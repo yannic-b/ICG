@@ -2,20 +2,62 @@ var gl;
 
 window.onload = function init()
 {
+
+	drawPacman(0.4, 16, 5);
+
+	render();
+};
+
+/**
+	radius von 0 - 1.0
+	Zeichnet aktuell nur einen Kreis
+*/
+
+function degreesToRadians(x)
+{
+	return x * (Math.PI / 180);
+}
+
+
+function drawPacman(radius, numberOfVertices, angleMouth)
+{
 	// Get canvas and setup WebGL
 	
 	var canvas = document.getElementById("gl-canvas");
 	gl = WebGLUtils.setupWebGL(canvas);
 	if (!gl) { alert("WebGL isn't available"); }
 
-	// Specify position and color of the vertices
-	
-	var vertices = new Float32Array([	-1, -1, 
-										0, 1, 
-										1, -1]);
-	var colors = new Float32Array([ 1, 0, 0, 1, 
-									1, 1, 0, 1,
-									0, 0, 1, 1,]);
+
+	// KOORDINATEN BERECHNEN
+
+	var koordinaten = [];
+	var colors = [];
+	var winkel = 360 / numberOfVertices;
+
+	koordinaten.push(0);
+	koordinaten.push(0);
+	colors.push(1);
+	colors.push(1.0);
+	colors.push(1);
+	colors.push(1.0);
+
+	for (var i = 0; i <= 360; i=i+winkel)
+	{
+		console.log(i);
+		koordinaten.push(Math.cos(degreesToRadians(i)) * radius);
+		koordinaten.push(Math.sin(degreesToRadians(i)) * radius);
+
+		colors.push(1);
+		colors.push(0);
+		colors.push(1);
+		colors.push(1.0);
+	}
+
+	var vertices = new Float32Array(koordinaten);
+	colors = new Float32Array(colors);
+
+	console.log(vertices);
+
 
 	// Configure viewport
 
@@ -46,12 +88,10 @@ window.onload = function init()
 	var vColor = gl.getAttribLocation(program, "vColor");
 	gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
 	gl.enableVertexAttribArray(vColor);
-
-	render();
-};
+}
 
 function render()
 {
 	gl.clear(gl.COLOR_BUFFER_BIT);
-	gl.drawArrays(gl.TRIANGLES, 0, 3);
+	gl.drawArrays(gl.TRIANGLE_FAN, 0, 18);
 }
