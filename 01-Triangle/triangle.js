@@ -1,11 +1,27 @@
 var gl;
+var num_vertex;
 
 window.onload = function init()
 {
 
-	drawPacman(0.4, 16, 5);
+	//drawPacman(0.4, 32, 60);
+	//render();
 
-	render();
+	var lol = true;
+	setInterval(function () {
+		if (lol)
+		{
+			lol = false;
+			drawPacman(0.4, 35, 50);
+			render();
+		}
+		else 
+		{
+			lol = true;
+			drawPacman(0.405, 35, 10);
+			render();
+		}
+	}, 300);
 };
 
 /**
@@ -41,16 +57,32 @@ function drawPacman(radius, numberOfVertices, angleMouth)
 	colors.push(1);
 	colors.push(1.0);
 
+
+	num_vertex = 1;
+
+	var mundwinkel = angleMouth / 2;
+
+	console.log("Mundwinkel:" + mundwinkel);
+
+
 	for (var i = 0; i <= 360; i=i+winkel)
 	{
-		console.log(i);
-		koordinaten.push(Math.cos(degreesToRadians(i)) * radius);
-		koordinaten.push(Math.sin(degreesToRadians(i)) * radius);
+		if ((i >= mundwinkel)&&(i <= (360 - mundwinkel)))
+		{
+			koordinaten.push(Math.cos(degreesToRadians(i)) * radius);
+			koordinaten.push(Math.sin(degreesToRadians(i)) * radius);
 
-		colors.push(1);
-		colors.push(0);
-		colors.push(1);
-		colors.push(1.0);
+			colors.push(1);
+			colors.push(0);
+			colors.push(1);
+			colors.push(1.0);
+
+			num_vertex += 1;
+		}
+		else
+		{
+			console.log("mund:");
+		}
 	}
 
 	var vertices = new Float32Array(koordinaten);
@@ -93,5 +125,5 @@ function drawPacman(radius, numberOfVertices, angleMouth)
 function render()
 {
 	gl.clear(gl.COLOR_BUFFER_BIT);
-	gl.drawArrays(gl.TRIANGLE_FAN, 0, 18);
+	gl.drawArrays(gl.TRIANGLE_FAN, 0, num_vertex);
 }
