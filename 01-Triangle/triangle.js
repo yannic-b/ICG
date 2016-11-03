@@ -15,7 +15,7 @@ window.onload = function init()
 			drawPacman(0.4, 35, 50);
 			render();
 		}
-		else 
+		else
 		{
 			lol = true;
 			drawPacman(0.405, 35, 10);
@@ -38,7 +38,7 @@ function degreesToRadians(x)
 function drawPacman(radius, numberOfVertices, angleMouth)
 {
 	// Get canvas and setup WebGL
-	
+
 	var canvas = document.getElementById("gl-canvas");
 	gl = WebGLUtils.setupWebGL(canvas);
 	if (!gl) { alert("WebGL isn't available"); }
@@ -100,7 +100,7 @@ function drawPacman(radius, numberOfVertices, angleMouth)
 
 	var program = initShaders(gl, "vertex-shader", "fragment-shader");
 	gl.useProgram(program);
-	
+
 	// Load positions into the GPU and associate shader variables
 
 	var posVBO = gl.createBuffer();
@@ -112,14 +112,18 @@ function drawPacman(radius, numberOfVertices, angleMouth)
 	gl.enableVertexAttribArray(vPosition);
 
 	// Load colors into the GPU and associate shader variables
-	
+
 	var colorVBO = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, colorVBO);
 	gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
-	
+
 	var vColor = gl.getAttribLocation(program, "vColor");
 	gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
 	gl.enableVertexAttribArray(vColor);
+
+	// konstater Skalierungsfaktor, der als uniform auf jeden Vertex angewendet werden kann
+	var scalarPosition = gl.getUniformLocation(program, "vScalar");
+	gl.uniform1f(scalarPosition, 2.0);
 }
 
 function render()

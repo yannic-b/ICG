@@ -8,6 +8,8 @@
 			attribute vec4 vPosition;
 			attribute vec4 vColor;
 
+			uniform float vScalar;
+
 			varying vec4 fColor;
 			void main()
 			{
@@ -18,7 +20,8 @@
 					// fColor unverändert lassen
 					fColor = vec4(0.0, 0.0, 1.0, 1.0);
 				}
-				gl_Position = vPosition;
+				vec4 newPos = vec4(vPosition.x * vScalar, vPosition.y * vScalar, vPosition.z, vPosition.w);
+				gl_Position = newPos;
 			}
 		</script>
 		<script id="fragment-shader" type="x-shader/x-fragment">
