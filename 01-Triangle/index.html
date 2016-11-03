@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8"/>
 		<title>WebGL Example</title>
-		
+
 		<script id="vertex-shader" type="x-shader/x-vertex">
 			attribute vec4 vPosition;
 			attribute vec4 vColor;
@@ -11,13 +11,19 @@
 			varying vec4 fColor;
 			void main()
 			{
-				fColor = vColor;
+				if (vPosition.y < 0.0) {
+					// fColor auf rote Farbe setzen
+					fColor = vec4(1.0, 0.0, 0.0, 1.0);
+				} else {
+					// fColor unverändert lassen
+					fColor = vColor;
+				}
 				gl_Position = vPosition;
 			}
 		</script>
 		<script id="fragment-shader" type="x-shader/x-fragment">
 			precision mediump float;
-			
+
 			varying vec4 fColor;
 			void main()
 			{
@@ -37,6 +43,6 @@
 
 		<canvas style="position:absolute; left: calc(50% - 360px);" id="gl-canvas" width="720" height="720">
 			If you see this, your browser doesn't support WebGL.
-		</canvas>	
+		</canvas>
 	</body>
 </html>
