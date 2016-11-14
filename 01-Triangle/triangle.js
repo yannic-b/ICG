@@ -3,7 +3,7 @@ var num_vertex;
 
 var current_positionX = 0.0;
 var current_positionY = 0.0;
-var current_rotation = 0.0;
+var current_rotation = 40;
 
 window.onload = function init()
 {
@@ -18,7 +18,6 @@ window.onload = function init()
 
 var drawAndRender = function()
 {
-	// do sth
 	drawPacman(0.2, 35, 50);
 	render();
 	requestAnimFrame(drawAndRender);
@@ -121,8 +120,26 @@ function drawPacman(radius, numberOfVertices, angleMouth)
 	// ÜBERGABE DER AKTUELLEN TRANSLATION
 	var transLoc = gl.getUniformLocation(program, "translation");
 	gl.uniform4fv(transLoc, new Float32Array([current_positionX, current_positionY, 0.0, 0.0]));
+
+
+	var cosB = Math.cos(degreesToRadians(current_rotation));
+	var sinB = Math.sin(degreesToRadians(current_rotation));
+
+	var u_CosB = gl.getUniformLocation(program, 'u_CosB');
+	var u_SinB = gl.getUniformLocation(program, 'u_SinB');
+	gl.uniform1f(u_CosB, cosB);
+	gl.uniform1f(u_SinB, sinB);
+
+
 }
 
+function getSineForAnAngle(angleInDegrees) {
+	return Math.sin(angleInDegrees * Math.PI / 180);
+}
+
+function getCosineForAnAngle(angleInDegrees) {
+	return Math.cos(angleInDegrees * Math.PI / 180);
+}
 
 function keyLogger(e)
 {
