@@ -5,6 +5,7 @@ var num_vertex;
 var current_positionX = 0.0;
 var current_positionY = 0.0;
 var current_rotation = 0;
+var velocity = 0.01;
 var radius;
 var program;
 
@@ -114,18 +115,18 @@ function rotateAndTranslate()
 function getYPosition()
 {
 	var sinA = Math.sin(degreesToRadians(current_rotation));
-	return sinA * 0.05;
+	return sinA * velocity;
 }
 
 function getXPosition()
 {
 	if ( (current_rotation > 90) || (current_rotation < -90))
 	{
-		return -1* Math.sqrt((0.05*0.05) - (getYPosition() * getYPosition()));
+		return -1* Math.sqrt((velocity*velocity) - (getYPosition() * getYPosition()));
 	}
 	else
 	{
-		return Math.sqrt((0.05*0.05) - (getYPosition() * getYPosition()));
+		return Math.sqrt((velocity*velocity) - (getYPosition() * getYPosition()));
 	}
 }
 
