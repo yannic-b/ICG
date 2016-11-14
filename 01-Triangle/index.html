@@ -12,20 +12,15 @@
 			uniform vec4 translation;
 
 			varying vec4 fColor;
+			varying vec4 fPosition;
 			void main()
 			{
 
 				fColor = vColor;
 				gl_Position = vPosition;
-				/*
-				if(distance(vPosition.xy, vec2(0.0, 0.0)) <= 1.2) {
-					fColor = vec4(0.0, 1.0, 0.0, 1.0);
-				} else {
-					fColor = vColor;
-				}
-				gl_Position = vPosition;
-				gl_Position.xy *= scalar;
-				gl_Position += translation;*/
+
+				gl_Position.xy *= 0.2;
+				gl_Position += translation;
 			}
 
 		</script>

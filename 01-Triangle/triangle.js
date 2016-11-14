@@ -1,12 +1,13 @@
 var gl;
 var num_vertex;
 
-var current_position;
-var current_rotation;
+var current_positionX = 0.0;
+var current_positionY = 0.0;
+var current_rotation = 0.0;
 
 window.onload = function init()
 {
-	drawPacman(0.1, 35, 50);
+	drawPacman(0.2, 35, 50);
 	render();
 
 
@@ -18,6 +19,8 @@ window.onload = function init()
 var drawAndRender = function()
 {
 	// do sth
+	drawPacman(0.2, 35, 50);
+	render();
 	requestAnimFrame(drawAndRender);
 };
 
@@ -114,6 +117,10 @@ function drawPacman(radius, numberOfVertices, angleMouth)
 	// konstater Skalierungsfaktor, der als uniform auf jeden Vertex angewendet werden kann
 	//var scalarPosition = gl.getUniformLocation(program, "vScalar");
 	//gl.uniform1f(scalarPosition, 2.0);
+
+	// ÜBERGABE DER AKTUELLEN TRANSLATION
+	var transLoc = gl.getUniformLocation(program, "translation");
+	gl.uniform4fv(transLoc, new Float32Array([current_positionX, current_positionY, 0.0, 0.0]));
 }
 
 
@@ -122,10 +129,11 @@ function keyLogger(e)
 	switch(e.keyCode)
 	{
 		case 38:
-			console.log("Vorwärts");
+			current_positionX += 0.05; // bzw anders später
 			break;
 		case 37:
 			console.log("Turn left");
+
 			break;
 		case 39:
 			console.log("Turn right");
