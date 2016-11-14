@@ -14,8 +14,6 @@ window.onload = function init()
 	gl = WebGLUtils.setupWebGL(canvas);
 	program = initShaders(gl, "vertex-shader", "fragment-shader");
 
-
-
 	radius = 0.05;
 	drawPacman(radius, 35, 50);
 	render();
@@ -40,33 +38,23 @@ function degreesToRadians(x)
 
 function drawPacman(radius, numberOfVertices, angleMouth)
 {
-	var koordinaten = [];
-	var colors = [];
+	var koordinaten = [0.0, 0.0];
+	var colors = [0.023, 0.572, 0.615, 1.0];
 	var winkel = 360 / numberOfVertices;
-
-	koordinaten.push(0);
-	koordinaten.push(0);
-	colors.push(0.023);
-	colors.push(0.572);
-	colors.push(0.615);
-	colors.push(1.0);
 
 	num_vertex = 1;
 
 	var mundwinkel = angleMouth / 2;
 
 
-	for (var i = 0; i <= 360; i=i+winkel)
+	for (var i = 0; i <= 360; i = i + winkel)
 	{
-		if ((i >= mundwinkel)&&(i <= (360 - mundwinkel)))
+		if ((i >= mundwinkel) && (i <= (360 - mundwinkel)))
 		{
 			koordinaten.push(Math.cos(degreesToRadians(i)) * radius);
 			koordinaten.push(Math.sin(degreesToRadians(i)) * radius);
 
-			colors.push(0.101);
-			colors.push(0.78);
-			colors.push(0.835);
-			colors.push(1.0);
+			colors = colors.concat([0.101, 0.78, 0.835, 1.0]);
 
 			num_vertex += 1;
 		}
@@ -77,14 +65,13 @@ function drawPacman(radius, numberOfVertices, angleMouth)
 
 	// Configure viewport
 
-	gl.viewport(0,0,canvas.width,canvas.height);
+	gl.viewport(0, 0, canvas.width, canvas.height);
 	gl.clearColor(0, 0, 0, 1)
 
 	// Init shader program and bind it
 
 	program = initShaders(gl, "vertex-shader", "fragment-shader");
 	gl.useProgram(program);
-
 
 	var transLoc = gl.getUniformLocation(program, "translation");
 	gl.uniform4fv(transLoc, new Float32Array([0.4, 0.7, 0.0, 0.0]));
@@ -145,11 +132,18 @@ function getXPosition()
 function keyLogger(e)
 {
 	var border = 1 - radius;
+	console.log("test");
+
+	var showAlert = function()
+	{
+		alert("Bitte umdrehen!");
+	}
 
 	switch(e.keyCode)
 	{
+		// Bewegung nach vorne/hinten berechnen
+		// ⬆️
 		case 38:
-
 			var newXPosition = current_positionX + getXPosition();
 			var newYPosition = current_positionY + getYPosition();
 
@@ -160,29 +154,10 @@ function keyLogger(e)
 			}
 			else
 			{
-				alert("Bitte umdrehen");
+				showAlert();
 			}
 			break;
-		case 37:
-			if (current_rotation < 180)
-			{
-				current_rotation += 1;
-			}
-			else
-			{
-				current_rotation = -179;
-			}
-			break;
-		case 39:
-			if (current_rotation > -179)
-			{
-				current_rotation -= 1;
-			}
-			else
-			{
-				current_rotation = 180;
-			}
-			break;
+		// ⬇️
 		case 40:
 			var newXPosition = current_positionX - getXPosition();
 			var newYPosition = current_positionY - getYPosition();
@@ -194,9 +169,34 @@ function keyLogger(e)
 			}
 			else
 			{
-				alert("Bitte umdrehen");
+				showAlert();
 			}
 			break;
+
+		// Rotation berechnen
+		// ⬅️
+		case 37:
+			if (current_rotation < 180)
+			{
+				current_rotation += 10;
+			}
+			else
+			{
+				current_rotation = -170;
+			}
+			break;
+		// ➡️
+		case 39:
+			if (current_rotation > -179)
+			{
+				current_rotation -= 10;
+			}
+			else
+			{
+				current_rotation = 180;
+			}
+			break;
+
 	}
 }
 

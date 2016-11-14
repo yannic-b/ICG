@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8"/>
-		<title>WebGL Example</title>
+		<title>The Trapped Pacman</title>
 		<link href='https://fonts.googleapis.com/css?family=Open+Sans:800,400,300' rel='stylesheet' type='text/css'>
     	<link rel="stylesheet" href="styles.css">
 
@@ -20,11 +20,8 @@
 			varying vec4 fPosition;
 			void main()
 			{
-
 				fColor = vColor;
 				gl_Position = vPosition;
-
-				//gl_Position.xy *= 0.1;
 
 				gl_Position.x = vPosition.x * u_CosB - vPosition.y * u_SinB;
 				gl_Position.y = vPosition.x * u_SinB + vPosition.y * u_CosB;
