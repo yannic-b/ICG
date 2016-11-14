@@ -1,26 +1,46 @@
 var gl;
 var num_vertex;
 
-var current_position;
-var current_rotation;
-
 window.onload = function init()
 {
-	drawPacman(0.1, 35, 50);
-	render();
 
+	//drawPacman(0.4, 32, 60);
+	//render();
 
+	/*var lol = true;
 
+	setInterval(function () {
+		if (lol)
+		{
+			lol = false;
+			drawPacman(0.4, 35, 50);
+			render();
+		}
+		else
+		{
+			lol = true;
+			drawPacman(0.405, 35, 10);
+			render();
+		}
+	}, 300);
+	*/
 	requestAnimFrame(drawAndRender);
 };
 
 
 var drawAndRender = function()
 {
-	// do sth
-	requestAnimFrame(drawAndRender);
+	//console.log("Rendered:");
+	drawPacman(0.4, 35, 50);
+	render();
+	//requestAnimFrame(drawAndRender);
 };
 
+
+/**
+	radius von 0 - 1.0
+	Zeichnet aktuell nur einen Kreis
+*/
 
 function degreesToRadians(x)
 {
@@ -87,10 +107,6 @@ function drawPacman(radius, numberOfVertices, angleMouth)
 	var program = initShaders(gl, "vertex-shader", "fragment-shader");
 	gl.useProgram(program);
 
-
-	var transLoc = gl.getUniformLocation(program, "translation");
-	gl.uniform4fv(transLoc, new Float32Array([0.4, 0.7, 0.0, 0.0]));
-
 	// Load positions into the GPU and associate shader variables
 
 	var posVBO = gl.createBuffer();
@@ -117,22 +133,15 @@ function drawPacman(radius, numberOfVertices, angleMouth)
 }
 
 
-function keyLogger(e)
+
+
+function consoleLogger(e)
 {
-	switch(e.keyCode)
-	{
-		case 38:
-			console.log("Vorwärts");
-			break;
-		case 37:
-			console.log("Turn left");
-			break;
-		case 39:
-			console.log("Turn right");
-			break;
-	}
+	console.log(e);
 }
-window.addEventListener("keydown", keyLogger);
+
+window.addEventListener("keypress", consoleLogger);
+
 
 
 var render = function()
