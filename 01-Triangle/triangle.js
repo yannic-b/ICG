@@ -132,7 +132,9 @@ function getXPosition()
 function keyLogger(e)
 {
 	var border = 1 - radius;
-	console.log("test");
+
+	// Kann erhöht werden, damit Pacman sich schneller dreht
+	var rotationSteps = 1;
 
 	var showAlert = function()
 	{
@@ -178,18 +180,18 @@ function keyLogger(e)
 		case 37:
 			if (current_rotation < 180)
 			{
-				current_rotation += 10;
+				current_rotation += rotationSteps;
 			}
 			else
 			{
-				current_rotation = -170;
+				current_rotation = -179;
 			}
 			break;
 		// ➡️
 		case 39:
 			if (current_rotation > -179)
 			{
-				current_rotation -= 10;
+				current_rotation -= rotationSteps;
 			}
 			else
 			{
