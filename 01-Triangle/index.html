@@ -3,6 +3,8 @@
 	<head>
 		<meta charset="utf-8"/>
 		<title>WebGL Example</title>
+		<link href='https://fonts.googleapis.com/css?family=Open+Sans:800,400,300' rel='stylesheet' type='text/css'>
+    	<link rel="stylesheet" href="styles.css">
 
 		<script id="vertex-shader" type="x-shader/x-vertex">
 
@@ -22,12 +24,13 @@
 				fColor = vColor;
 				gl_Position = vPosition;
 
-				gl_Position.xy *= 0.2;
-				gl_Position += translation;
+				//gl_Position.xy *= 0.1;
 
 				gl_Position.x = vPosition.x * u_CosB - vPosition.y * u_SinB;
 				gl_Position.y = vPosition.x * u_SinB + vPosition.y * u_CosB;
 
+				gl_Position.x += translation.x;
+				gl_Position.y += translation.y;
 			}
 
 		</script>
@@ -49,9 +52,9 @@
 		</script>
 	</head>
 	<body>
-		<h2 style="text-align: center; font-family: Helvetica;">Lorem Ipsum</h2>
+		<h1 style="text-align: center;">The Trapped Pacman</h2>
 
-		<canvas style="position:absolute; left: calc(50% - 360px);" id="gl-canvas" width="720" height="720">
+		<canvas style="position:absolute; left: calc(50% - 360px);" id="gl-canvas" width="700" height="700">
 			If you see this, your browser doesn't support WebGL.
 		</canvas>
 	</body>
