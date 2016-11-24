@@ -1,0 +1,21 @@
+body {
+    background: #2A2B3C;
+    padding: 0px;
+    margin: 0px;
+    -webkit-font-smoothing: antialiased !important;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+}
+
+h1 {
+    color: slategrey;
+    text-align: left;
+    font-size: 30px;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased !important;
+    color: rgba(255,255,255,0.3);
+}
+
+canvas {
+    position:absolute;
+}
