@@ -1,3 +1,4 @@
+//Deklaration der globalen Variablen:
 var gl;
 var canvas;
 
@@ -31,6 +32,74 @@ window.onload = function init()
 	gl = WebGLUtils.setupWebGL(canvas);
 	if (!gl) { alert("WebGL isn't available"); }
 
+	//Model initialation:
+	initModels();
+
+	// Configure viewport
+
+	gl.viewport(0, 0, canvas.width, canvas.height);
+	gl.clearColor(1.0, 1.0, 1.0, 1.0);
+	gl.enable(gl.DEPTH_TEST);
+
+	// Init shader program and bind it
+
+	var program = initShaders(gl, "vertex-shader", "fragment-shader");
+	gl.useProgram(program);
+
+    // Load positions into the GPU and associate shader variables
+
+	positionBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+
+	var vPosition = gl.getAttribLocation(program, "vPosition");
+	gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(vPosition);
+
+	// Load colors into the GPU and associate shader variables
+
+	colorBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
+
+	var vColor = gl.getAttribLocation(program, "vColor");
+	gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(vColor);
+
+	// Set model matrix
+
+	modelMatrix = new Float32Array([1, 0, 0, 0,
+									0, 1, 0, 0,
+									0, 0, 1, 0,
+									0, 0, 0, 1]);
+
+	modelMatrixLoc = gl.getUniformLocation(program, "modelMatrix");
+	gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
+
+    // Set view matrix
+
+	eye = vec3.fromValues(0.0, 1.0, 3.0);
+	target = vec3.fromValues(0.0, 0.0, 0.0);
+	up = vec3.fromValues(0.0, 1.0, 0.0);
+
+	viewMatrix = mat4.create();
+	mat4.lookAt(viewMatrix, eye, target, up);
+
+	viewMatrixLoc = gl.getUniformLocation(program, "viewMatrix");
+	gl.uniformMatrix4fv(viewMatrixLoc, false, viewMatrix);
+
+    // Set projection matrix
+
+	projectionMatrix = mat4.create();
+	mat4.perspective(projectionMatrix, Math.PI * 0.25, canvas.width / canvas.height, 0.5, 100);
+
+	projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix");
+	gl.uniformMatrix4fv(projectionMatrixLoc, false, projectionMatrix);
+
+	render();
+};
+
+function initModels() {
 	// Specify position and color of the vertices
 
 									 // Front
@@ -137,72 +206,11 @@ window.onload = function init()
 									0, 1, 1, 1
 								]);
 
-	// Configure viewport
-
-	gl.viewport(0, 0, canvas.width, canvas.height);
-	gl.clearColor(1.0, 1.0, 1.0, 1.0);
-	gl.enable(gl.DEPTH_TEST);
-
-	// Init shader program and bind it
-
-	var program = initShaders(gl, "vertex-shader", "fragment-shader");
-	gl.useProgram(program);
-
-    // Load positions into the GPU and associate shader variables
-
-	positionBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-	gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
-
-	var vPosition = gl.getAttribLocation(program, "vPosition");
-	gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
-	gl.enableVertexAttribArray(vPosition);
-
-	// Load colors into the GPU and associate shader variables
-
-	colorBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-	gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
-
-	var vColor = gl.getAttribLocation(program, "vColor");
-	gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
-	gl.enableVertexAttribArray(vColor);
-
-	// Set model matrix
-
-	modelMatrix = new Float32Array([1, 0, 0, 0,
-									0, 1, 0, 0,
-									0, 0, 1, 0,
-									0, 0, 0, 1]);
-
-	modelMatrixLoc = gl.getUniformLocation(program, "modelMatrix");
-	gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
-
-    // Set view matrix
-
-	eye = vec3.fromValues(0.0, 1.0, 2.0);
-	target = vec3.fromValues(0.0, 0.0, 0.0);
-	up = vec3.fromValues(0.0, 1.0, 0.0);
-
-	viewMatrix = mat4.create();
-	mat4.lookAt(viewMatrix, eye, target, up);
-
-	viewMatrixLoc = gl.getUniformLocation(program, "viewMatrix");
-	gl.uniformMatrix4fv(viewMatrixLoc, false, viewMatrix);
-
-    // Set projection matrix
-
-	projectionMatrix = mat4.create();
-	mat4.perspective(projectionMatrix, Math.PI * 0.25, canvas.width / canvas.height, 0.5, 100);
-
-	projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix");
-	gl.uniformMatrix4fv(projectionMatrixLoc, false, projectionMatrix);
-
-	render();
-};
+}
 
 function render()
 {
+	// Hier wird die Bewegung ausgeführt
 	if (isDown[0])
 	{
 		moveForward();
@@ -282,11 +290,10 @@ function keyUp(e)
 }
 window.addEventListener("keyup", keyUp);
 
-
-// Hier wird die Bewegung ausgeführt
-
 // Kann modifiziert werden, um Bewegungsgeschwindigkeit zu ändern
-var speed = 0.03;
+var speed = 0.025;
+
+//Spezifizierung der Bewegungen:
 function moveForward()
 {
 	eye[2] = eye[2] - speed;
