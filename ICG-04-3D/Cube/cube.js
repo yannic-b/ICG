@@ -32,7 +32,7 @@ window.onload = function init()
 	gl = WebGLUtils.setupWebGL(canvas);
 	if (!gl) { alert("WebGL isn't available"); }
 
-	//Model initialation:
+	// Model initilization
 	initModels();
 
 	// Configure viewport
@@ -69,18 +69,18 @@ window.onload = function init()
 	// Set model matrix
 
 	modelMatrix = new Float32Array([1, 0, 0, 0,
-									0, 1, 0, 0,
+									0, 0.001, 0, 0,
 									0, 0, 1, 0,
-									0, 0, 0, 1]);
+									0, 0, 0, 0.1]);
 
 	modelMatrixLoc = gl.getUniformLocation(program, "modelMatrix");
 	gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
 
     // Set view matrix
 
-	eye = vec3.fromValues(0.0, 1.0, 3.0);
+	eye = vec3.fromValues(0.0, .2, 3.0);
 	target = vec3.fromValues(0.0, 0.0, 0.0);
-	up = vec3.fromValues(0.0, 1.0, 0.0);
+	up = vec3.fromValues(0.0, 1.0, 1.0);
 
 	viewMatrix = mat4.create();
 	mat4.lookAt(viewMatrix, eye, target, up);
@@ -198,14 +198,13 @@ function initModels() {
 									1, 0, 1, 1,
 
 									// Top
-									0, 1, 1, 1,
-									0, 1, 1, 1,
-									0, 1, 1, 1,
-									0, 1, 1, 1,
-									0, 1, 1, 1,
-									0, 1, 1, 1
+									0, 1, 0.2, 1,
+									0, 1, 0.2, 1,
+									0, 1, 0.2, 1,
+									0, 1, 0.2, 1,
+									0, 1, 0.2, 1,
+									0, 1, 0.2, 1
 								]);
-
 }
 
 function render()
