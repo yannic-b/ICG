@@ -291,13 +291,14 @@ function keyUp(e)
 window.addEventListener("keyup", keyUp);
 
 // Kann modifiziert werden, um Bewegungsgeschwindigkeit zu ändern
-var speed = 0.025;
+var speed = 0.05;
 
 //Spezifizierung der Bewegungen:
 function moveForward()
 {
-	eye[2] = eye[2] - speed;
-	target[2] = target[2] - speed;
+	// doppelt so schnell nach vorne bewegen, wie andere Richtungen - natürlicherer Bewegungsablauf
+	eye[2] = eye[2] - speed * 2;
+	target[2] = target[2] - speed * 2;
 }
 function moveLeft()
 {
