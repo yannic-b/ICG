@@ -1,3 +1,4 @@
+
 //Deklaration der globalen Variablen:
 var gl;
 var canvas;
@@ -32,7 +33,7 @@ window.onload = function init()
 	gl = WebGLUtils.setupWebGL(canvas);
 	if (!gl) { alert("WebGL isn't available"); }
 
-	//Model initialation:
+	// Model initilization
 	initModels();
 
 	// Configure viewport
@@ -69,9 +70,9 @@ window.onload = function init()
 	// Set model matrix
 
 	modelMatrix = new Float32Array([1, 0, 0, 0,
-									0, 1, 0, 0,
+									0, 0.001, 0, 0,
 									0, 0, 1, 0,
-									0, 0, 0, 1]);
+									0, 0, 0, 0.1]);
 
 	modelMatrixLoc = gl.getUniformLocation(program, "modelMatrix");
 	gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
@@ -80,7 +81,7 @@ window.onload = function init()
 
 	eye = vec3.fromValues(2.0, 0.0, 3.0);
 	target = vec3.fromValues(0.0, 0.0, 0.0);
-	up = vec3.fromValues(0.0, 1.0, 0.0);
+	up = vec3.fromValues(0.0, 1.0, 1.0);
 
 	viewMatrix = mat4.create();
 	mat4.lookAt(viewMatrix, eye, target, up);
@@ -198,14 +199,13 @@ function initModels() {
 									1, 0, 1, 1,
 
 									// Top
-									0, 1, 1, 1,
-									0, 1, 1, 1,
-									0, 1, 1, 1,
-									0, 1, 1, 1,
-									0, 1, 1, 1,
-									0, 1, 1, 1
+									0, 1, 0.2, 1,
+									0, 1, 0.2, 1,
+									0, 1, 0.2, 1,
+									0, 1, 0.2, 1,
+									0, 1, 0.2, 1,
+									0, 1, 0.2, 1
 								]);
-
 }
 
 function render()
@@ -291,7 +291,7 @@ function keyUp(e)
 window.addEventListener("keyup", keyUp);
 
 // Kann modifiziert werden, um Bewegungsgeschwindigkeit zu ändern
-var speed = 0.025;
+var speed = 0.05;
 
 //Spezifizierung der Bewegungen:
 function moveForward()
@@ -300,11 +300,12 @@ function moveForward()
 	vec3.subtract(direction, target, eye);
 	direction[1] = 0.0;
 	vec3.normalize(direction, direction);
-	vec3.scale(direction, direction, speed);
+	vec3.scale(direction, direction, speed*2);
 	vec3.add(eye, direction, eye);
 	vec3.add(target, direction, target);
-	//eye[2] = eye[2] - speed;
-	//target[2] = target[2] - speed;
+	// doppelt so schnell nach vorne bewegen, wie andere Richtungen - natürlicherer Bewegungsablauf
+	//eye[2] = eye[2] - speed * 2;
+	//target[2] = target[2] - speed * 2;
 }
 function moveLeft()
 {
