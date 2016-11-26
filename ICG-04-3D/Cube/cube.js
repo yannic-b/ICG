@@ -8,9 +8,13 @@ var colors;
 
 var positionBuffer;
 var colorBuffer;
+var positionBuffer2;
+var colorBuffer2;
 
 var modelMatrixLoc;
+var modelMatrixLoc2;
 var modelMatrix;
+var modelMatrix2;
 
 var viewMatrixLoc;
 var viewMatrix;
@@ -45,7 +49,34 @@ window.onload = function init()
 	// Init shader program and bind it
 
 	var program = initShaders(gl, "vertex-shader", "fragment-shader");
-	gl.useProgram(program);
+    gl.useProgram(program);
+    
+    // Set view matrix
+    
+    // Kameraposition:
+    eye = vec3.fromValues(0.0, 1.0, 3.0);
+    // Mittelpunkt - Blickrichtung:
+    target = vec3.fromValues(0.0, 0.0, 0.0);
+    // Kameraneigung:
+    up = vec3.fromValues(0.0, 1.0, 0.0);
+    
+    viewMatrix = mat4.create();
+    mat4.lookAt(viewMatrix, eye, target, up);
+    
+    viewMatrixLoc = gl.getUniformLocation(program, "viewMatrix");
+    gl.uniformMatrix4fv(viewMatrixLoc, false, viewMatrix);
+    
+    // Set projection matrix
+    
+    projectionMatrix = mat4.create();
+    mat4.perspective(projectionMatrix, Math.PI * 0.25, canvas.width / canvas.height, 0.5, 100);
+    
+    projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix");
+    gl.uniformMatrix4fv(projectionMatrixLoc, false, projectionMatrix);
+    
+    
+    
+    
 
     // Load positions into the GPU and associate shader variables
 
@@ -68,15 +99,9 @@ window.onload = function init()
 	gl.enableVertexAttribArray(vColor);
 
 	// Set model matrix
-	/*
-	//Würfel:
-	modelMatrix = new Float32Array([1, 0, 0, 0,
-									0, 1, 0, 0,
-									0, 0, 1, 0,
-									0, 0, 0, 1]);
-									*/
-	///*
-	//Bodenplatte:
+	
+	//
+	// Bodenplatte:
 	modelMatrix = new Float32Array([1, 0, 0, 0,
 									0, 0.001, 0, 0,
 									0, 0, 1, 0,
@@ -85,29 +110,43 @@ window.onload = function init()
 
 	modelMatrixLoc = gl.getUniformLocation(program, "modelMatrix");
 	gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
-
-    // Set view matrix
-
-	// Kameraposition:
-	eye = vec3.fromValues(0.0, 1.0, 3.0);
-	// Mittelpunkt - Blickrichtung:
-	target = vec3.fromValues(0.0, 0.0, 0.0);
-	// Kameraneigung:
-	up = vec3.fromValues(0.0, 1.0, 0.0);
-
-	viewMatrix = mat4.create();
-	mat4.lookAt(viewMatrix, eye, target, up);
-
-	viewMatrixLoc = gl.getUniformLocation(program, "viewMatrix");
-	gl.uniformMatrix4fv(viewMatrixLoc, false, viewMatrix);
-
-    // Set projection matrix
-
-	projectionMatrix = mat4.create();
-	mat4.perspective(projectionMatrix, Math.PI * 0.25, canvas.width / canvas.height, 0.5, 100);
-
-	projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix");
-	gl.uniformMatrix4fv(projectionMatrixLoc, false, projectionMatrix);
+    
+    
+    
+    
+    
+    // Load positions into the GPU and associate shader variables
+    
+    positionBuffer2 = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer2);
+    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+    
+    var vPosition2 = gl.getAttribLocation(program, "vPosition");
+    gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vPosition);
+    
+    // Load colors into the GPU and associate shader variables
+    
+    colorBuffer2 = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer2);
+    gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
+    
+    var vColor2 = gl.getAttribLocation(program, "vColor");
+    gl.vertexAttribPointer(vColor2, 4, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vColor2);
+    
+    // Set model matrix
+    
+    // Würfel:
+    modelMatrix2 = new Float32Array([1, 0, 0, 0,
+                                     0, 1, 0, 0,
+                                     0, 0, 1, 0,
+                                     0, 0, 0, 1]);
+    
+    modelMatrixLoc2 = gl.getUniformLocation(program, "modelMatrix");
+    gl.uniformMatrix4fv(modelMatrixLoc2, false, modelMatrix2);
+    
+  
 
 	render();
 };
@@ -241,7 +280,7 @@ function render()
 	}
 
 	mat4.lookAt(viewMatrix, eye, target, up);
-
+    
 	gl.uniformMatrix4fv(viewMatrixLoc, false, viewMatrix);
 	gl.uniformMatrix4fv(projectionMatrixLoc, false, projectionMatrix);
 
