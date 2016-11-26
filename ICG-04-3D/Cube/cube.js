@@ -78,7 +78,7 @@ window.onload = function init()
 
     // Set view matrix
 
-	eye = vec3.fromValues(0.0, 1.0, 3.0);
+	eye = vec3.fromValues(2.0, 0.0, 3.0);
 	target = vec3.fromValues(0.0, 0.0, 0.0);
 	up = vec3.fromValues(0.0, 1.0, 0.0);
 
@@ -296,23 +296,58 @@ var speed = 0.025;
 //Spezifizierung der Bewegungen:
 function moveForward()
 {
-	eye[2] = eye[2] - speed;
-	target[2] = target[2] - speed;
+	var direction = vec3.create();
+	vec3.subtract(direction, target, eye);
+	direction[1] = 0.0;
+	vec3.normalize(direction, direction);
+	vec3.scale(direction, direction, speed);
+	vec3.add(eye, direction, eye);
+	vec3.add(target, direction, target);
+	//eye[2] = eye[2] - speed;
+	//target[2] = target[2] - speed;
 }
 function moveLeft()
 {
-	eye[0] = eye[0] - speed;
-	target[0] = target[0] - speed;
+	var direction = vec3.create();
+	vec3.subtract(direction, target, eye);
+	direction[1] = 0.0;
+	vec3.normalize(direction, direction);
+	vec3.scale(direction, direction, speed);
+	var x = vec3.clone(direction);
+	direction[0] = x[2];
+	direction[1] = x[1];
+	direction[2] = -x[0];
+	vec3.add(eye, direction, eye);
+	vec3.add(target, direction, target);
+	//eye[0] = eye[0] - speed;
+	//target[0] = target[0] - speed;
 }
 function moveBackwards()
 {
-
-	eye[2] = eye[2] + speed;
-	target[2] = target[2] + speed;
+	var direction = vec3.create();
+	vec3.subtract(direction, target, eye);
+	vec3.negate(direction, direction);
+	direction[1] = 0.0;
+	vec3.normalize(direction, direction);
+	vec3.scale(direction, direction, speed);
+	vec3.add(eye, direction, eye);
+	vec3.add(target, direction, target);
+	//eye[2] = eye[2] + speed;
+	//target[2] = target[2] + speed;
 }
 function moveRight()
 {
-
-	eye[0] = eye[0] + speed;
-	target[0] = target[0] + speed;
+	var direction = vec3.create();
+	vec3.subtract(direction, target, eye);
+	direction[1] = 0.0;
+	vec3.normalize(direction, direction);
+	vec3.scale(direction, direction, speed);
+	var x = vec3.clone(direction);
+	direction[0] = -x[2];
+	direction[1] = x[1];
+	direction[2] = x[0];
+	vec3.add(eye, direction, eye);
+	vec3.add(target, direction, target);
+	//eye[0] = eye[0] + speed;
+	//target[0] = target[0] + speed;
 }
