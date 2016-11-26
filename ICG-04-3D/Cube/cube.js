@@ -86,13 +86,13 @@ window.onload = function init()
 	modelMatrixLoc = gl.getUniformLocation(program, "modelMatrix");
 	gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
 
-  // Set view matrix
+    // Set view matrix
 
-	//Kameraposition:
-	eye = vec3.fromValues(2.0, 0.1, 3.0);
-	//Mittelpunkt - Blickrichtung:
+	// Kameraposition:
+	eye = vec3.fromValues(0.0, 1.0, 3.0);
+	// Mittelpunkt - Blickrichtung:
 	target = vec3.fromValues(0.0, 0.0, 0.0);
-	//Kameraneigung:
+	// Kameraneigung:
 	up = vec3.fromValues(0.0, 1.0, 0.0);
 
 	viewMatrix = mat4.create();
