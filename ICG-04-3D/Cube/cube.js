@@ -68,20 +68,32 @@ window.onload = function init()
 	gl.enableVertexAttribArray(vColor);
 
 	// Set model matrix
-
+	/*
+	//Würfel:
+	modelMatrix = new Float32Array([1, 0, 0, 0,
+									0, 1, 0, 0,
+									0, 0, 1, 0,
+									0, 0, 0, 1]);
+									*/
+	///*
+	//Bodenplatte:
 	modelMatrix = new Float32Array([1, 0, 0, 0,
 									0, 0.001, 0, 0,
 									0, 0, 1, 0,
 									0, 0, 0, 0.1]);
+									//*/
 
 	modelMatrixLoc = gl.getUniformLocation(program, "modelMatrix");
 	gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
 
-    // Set view matrix
+  // Set view matrix
 
-	eye = vec3.fromValues(2.0, 0.0, 3.0);
+	//Kameraposition:
+	eye = vec3.fromValues(2.0, 0.1, 3.0);
+	//Mittelpunkt - Blickrichtung:
 	target = vec3.fromValues(0.0, 0.0, 0.0);
-	up = vec3.fromValues(0.0, 1.0, 1.0);
+	//Kameraneigung:
+	up = vec3.fromValues(0.0, 1.0, 0.0);
 
 	viewMatrix = mat4.create();
 	mat4.lookAt(viewMatrix, eye, target, up);
@@ -300,10 +312,11 @@ function moveForward()
 	vec3.subtract(direction, target, eye);
 	direction[1] = 0.0;
 	vec3.normalize(direction, direction);
+	// doppelt so schnell nach vorne bewegen,
+	// wie andere Richtungen - natürlicherer Bewegungsablauf
 	vec3.scale(direction, direction, speed*2);
 	vec3.add(eye, direction, eye);
 	vec3.add(target, direction, target);
-	// doppelt so schnell nach vorne bewegen, wie andere Richtungen - natürlicherer Bewegungsablauf
 	//eye[2] = eye[2] - speed * 2;
 	//target[2] = target[2] - speed * 2;
 }
