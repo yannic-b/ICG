@@ -365,3 +365,39 @@ function moveRight()
 	//eye[0] = eye[0] + speed;
 	//target[0] = target[0] + speed;
 }
+
+//Code zuständig für pointerlock und mousemovement:
+//WIP
+/*
+document.addEventListener('pointerlockchange', lockChangeAlert, false);
+document.addEventListener('mozpointerlockchange', lockChangeAlert, false);
+document.addEventListener('webkitpointerlockchange', lockChangeAlert, false);
+
+canvas.requestPointerLock = canvas.requestPointerLock ||
+                            canvas.mozRequestPointerLock ||
+														canvas.webkitRequestPointerLock;
+//canvas.requestPointerLock();
+
+document.exitPointerLock = document.exitPointerLock ||
+                           document.mozExitPointerLock ||
+													 document.webkitExitPointerLock;
+//canvas.exitPointerLock();
+
+function lockChangeAlert()
+{
+  if (document.pointerLockElement === canvas ||
+      document.mozPointerLockElement === canvas ||
+			document.webkitPointerLockElement === canvas) {
+    console.log('The pointer lock status is now locked');
+    document.addEventListener("mousemove", updateViewingDirection, false);
+  } else {
+    console.log('The pointer lock status is now unlocked');
+    document.removeEventListener("mousemove", updateViewingDirection, false);
+  }
+}
+
+function updateViewingPosition(e)
+{
+
+}
+*/
