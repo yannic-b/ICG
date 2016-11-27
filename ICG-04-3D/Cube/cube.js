@@ -3,26 +3,18 @@
 // globales WebGL-Objekt
 var gl;
 
-//
+// globales shader-program
 var program;
 
-var positions;
-var colors;
+// globale positions und colors für die Buffer
+var positions; var colors;
 
-var modelMatrixLoc;
+// view- und projection-matrix
+var viewMatrixLoc; var viewMatrix;
+var projectionMatrixLoc; var projectionMatrix;
 
-var modelMatrix;
-var modelMatrix2;
-
-var viewMatrixLoc;
-var viewMatrix;
-
-var projectionMatrixLoc;
-var projectionMatrix;
-
-var eye;
-var target;
-var up;
+// Kamera
+var eye; var target; var up;
 
 function setupWebGL(document)
 {
@@ -183,6 +175,36 @@ function initModels()
 								]);
 }
 
+/// generiert für eine
+function makeCubeUniColorArray(r,g,b,a)
+{
+    var colorArray = new Float32Array(144);
+
+    for (var i = 0; i < colorArray.length; i++)
+    {
+        switch (i % 4)
+        {
+            // Rot
+            case 0:
+                colorArray[i] = r;
+                break;
+            // Grün
+            case 1:
+                colorArray[i] = g;
+                break;
+            // Blau
+            case 2:
+                colorArray[i] = b;
+                break;
+            // Alpha
+            case 3:
+                colorArray[i] = a;
+                break;
+        }
+    }
+    return colorArray;
+}
+
 function drawObject1()
 {
     // Position
@@ -194,8 +216,9 @@ function drawObject1()
     gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vPosition);
     
-    // Load colors into the GPU and associate shader variables
-    
+    // Color
+    // Array für einen unifarbend dunkelgrünen Untergrund erstellen
+    var colors = makeCubeUniColorArray(0.1, 0.9, 0.1, 1.0);
     var colorBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
@@ -210,7 +233,7 @@ function drawObject1()
                                     0, 0.001, 0, 0,
                                     0, 0, 1, 0,
                                     0, 0, 0, 0.1]);
-    modelMatrixLoc = gl.getUniformLocation(program, "modelMatrix");
+    var modelMatrixLoc = gl.getUniformLocation(program, "modelMatrix");
     gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
     
     // Zeichnen ausführen
@@ -229,6 +252,8 @@ function drawObject2()
     gl.enableVertexAttribArray(vPosition);
     
     // Color
+    // Array für einen unifarbend roten Würfel erstellen
+    var colors = makeCubeUniColorArray(1.0, 0, 0, 1.0);
     var colorBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
@@ -243,7 +268,7 @@ function drawObject2()
                                         0, 1, 0, 0,
                                         0, 0, 1, 0,
                                         0, 0, 0, 1]);
-    modelMatrixLoc = gl.getUniformLocation(program, "modelMatrix");
+    var modelMatrixLoc = gl.getUniformLocation(program, "modelMatrix");
     gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
     
     // Zeichnen ausführen
