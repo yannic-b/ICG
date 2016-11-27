@@ -6,9 +6,6 @@ var gl;
 // globales shader-program
 var program;
 
-// globale positions und colors für die Buffer
-var positions; var colors;
-
 // view- und projection-matrix
 var viewMatrixLoc; var viewMatrix;
 var projectionMatrixLoc; var projectionMatrix;
@@ -16,6 +13,21 @@ var projectionMatrixLoc; var projectionMatrix;
 // Kamera
 var eye; var target; var up;
 
+// 3D-Objekte, die präsentiert werden (für die Parameter siehe RenderObject.js)
+var objectsToRender = [
+    new RenderObject(positions, colors, groundModelMatrix),
+    new RenderObject(positions, colors, cubeModelMatrix)
+];
+
+
+window.onload = function init()
+{
+    // WebGL initialisieren
+    setupWebGL(document);
+    
+    // Render-Loop beginnen
+	render();
+};
 
 function setupWebGL(document)
 {
@@ -46,7 +58,7 @@ function setupWebGL(document)
     projectionMatrix = mat4.create();
     mat4.perspective(projectionMatrix, Math.PI * 0.25, canvas.width / canvas.height, 0.5, 100);
     projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix");
-
+    
     // initiale Kameraposition einstellen
     eye = vec3.fromValues(0.0, 1.0, 3.0);
     // Mittelpunkt - Blickrichtung
@@ -55,222 +67,29 @@ function setupWebGL(document)
     up = vec3.fromValues(0.0, 1.0, 0.0);
 }
 
-window.onload = function init()
-{
-	// Models initialisieren
-	initModels();
-	
-    // WebGL initialisieren
-    setupWebGL(document);
-    
-    // Render-Loop beginnen
-	render();
-};
 
-function initModels()
-{
-	// Specify position and color of the vertices
-
-									 // Front
-	positions = new Float32Array([  -0.5, -0.5,  0.5,
-								     0.5, -0.5,  0.5,
-								     0.5,  0.5,  0.5,
-
-									 0.5,  0.5,  0.5,
-									-0.5,  0.5,  0.5,
-									-0.5, -0.5,  0.5,
-
-									 // Right
-									 0.5,  0.5,  0.5,
-									 0.5, -0.5,  0.5,
-									 0.5, -0.5, -0.5,
-
-									 0.5, -0.5, -0.5,
-									 0.5,  0.5, -0.5,
-									 0.5,  0.5,  0.5,
-
-									 // Back
-									-0.5, -0.5, -0.5,
-									 0.5, -0.5, -0.5,
-									 0.5,  0.5, -0.5,
-
-									 0.5,  0.5, -0.5,
-									-0.5,  0.5, -0.5,
-									-0.5, -0.5, -0.5,
-
-									 // Left
-									-0.5,  0.5,  0.5,
-									-0.5, -0.5,  0.5,
-									-0.5, -0.5, -0.5,
-
-									-0.5, -0.5, -0.5,
-									-0.5,  0.5, -0.5,
-									-0.5,  0.5,  0.5,
-
-									 // Bottom
-									-0.5, -0.5,  0.5,
-									 0.5, -0.5,  0.5,
-									 0.5, -0.5, -0.5,
-
-									 0.5, -0.5, -0.5,
-									-0.5, -0.5, -0.5,
-									-0.5, -0.5,  0.5,
-
-									 // Top
-									-0.5,  0.5,  0.5,
-									 0.5,  0.5,  0.5,
-									 0.5,  0.5, -0.5,
-
-									 0.5,  0.5, -0.5,
-									-0.5,  0.5, -0.5,
-									-0.5,  0.5,  0.5
-								]);
-
-									// Front
-	colors = new Float32Array([     0, 0, 1, 1,
-									0, 0, 1, 1,
-									0, 0, 1, 1,
-									0, 0, 1, 1,
-									0, 0, 1, 1,
-									0, 0, 1, 1,
-
-									// Right
-									0, 1, 0, 1,
-									0, 1, 0, 1,
-									0, 1, 0, 1,
-									0, 1, 0, 1,
-									0, 1, 0, 1,
-									0, 1, 0, 1,
-
-									// Back
-									1, 0, 0, 1,
-									1, 0, 0, 1,
-									1, 0, 0, 1,
-									1, 0, 0, 1,
-									1, 0, 0, 1,
-									1, 0, 0, 1,
-
-									// Left
-									1, 1, 0, 1,
-									1, 1, 0, 1,
-									1, 1, 0, 1,
-									1, 1, 0, 1,
-									1, 1, 0, 1,
-									1, 1, 0, 1,
-
-									// Bottom
-									1, 0, 1, 1,
-									1, 0, 1, 1,
-									1, 0, 1, 1,
-									1, 0, 1, 1,
-									1, 0, 1, 1,
-									1, 0, 1, 1,
-
-									// Top
-									0, 1, 0.2, 1,
-									0, 1, 0.2, 1,
-									0, 1, 0.2, 1,
-									0, 1, 0.2, 1,
-									0, 1, 0.2, 1,
-									0, 1, 0.2, 1
-								]);
-}
-
-/// generiert für eine gegebene Farbe ein einfarbiges Color-Array, das als Color-Buffer verwendet werden kann
-function makeCubeUniColorArray(r,g,b,a)
-{
-    var colorArray = new Float32Array(144);
-
-    for (var i = 0; i < colorArray.length; i++)
-    {
-        switch (i % 4)
-        {
-            // Rot
-            case 0:
-                colorArray[i] = r;
-                break;
-            // Grün
-            case 1:
-                colorArray[i] = g;
-                break;
-            // Blau
-            case 2:
-                colorArray[i] = b;
-                break;
-            // Alpha
-            case 3:
-                colorArray[i] = a;
-                break;
-        }
-    }
-    return colorArray;
-}
-
-function drawObject1()
+function drawObject(currentObject, index, originalArray)
 {
     // Position
     var positionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, currentObject.positionBuffer, gl.STATIC_DRAW);
     
     var vPosition = gl.getAttribLocation(program, "vPosition");
     gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vPosition);
     
     // Color
-    // Array für einen unifarbend dunkelgrünen Untergrund erstellen
-    var colors = makeCubeUniColorArray(0.1, 0.9, 0.1, 1.0);
     var colorBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, currentObject.colorBuffer, gl.STATIC_DRAW);
     
     var vColor = gl.getAttribLocation(program, "vColor");
     gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vColor);
     
-    // Model
-    // Bodenplatte
-    modelMatrix = new Float32Array([1, 0, 0, 0,
-                                    0, 0.001, 0, 0,
-                                    0, 0, 1, 0,
-                                    0, 0, 0, 0.1]);
     var modelMatrixLoc = gl.getUniformLocation(program, "modelMatrix");
-    gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
-    
-    // Zeichnen ausführen
-    gl.drawArrays(gl.TRIANGLES, 0, positions.length/3);
-}
-
-function drawObject2()
-{
-    // Position
-    var positionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
-    
-    var vPosition = gl.getAttribLocation(program, "vPosition");
-    gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(vPosition);
-    
-    // Color
-    // Array für einen unifarbend roten Würfel erstellen
-    var colors = makeCubeUniColorArray(1.0, 0, 0, 1.0);
-    var colorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
-    
-    var vColor = gl.getAttribLocation(program, "vColor");
-    gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(vColor);
-    
-    // Model
-    // Würfel
-    var modelMatrix = new Float32Array([1, 0, 0, 0,
-                                        0, 1, 0, 0,
-                                        0, 0, 1, 0,
-                                        0, 0, 0, 1]);
-    var modelMatrixLoc = gl.getUniformLocation(program, "modelMatrix");
-    gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
+    gl.uniformMatrix4fv(modelMatrixLoc, false, currentObject.modelMatrix);
     
     // Zeichnen ausführen
     gl.drawArrays(gl.TRIANGLES, 0, positions.length/3);
@@ -307,8 +126,7 @@ function render()
     gl.uniformMatrix4fv(projectionMatrixLoc, false, projectionMatrix);
     
     // Objekte zeichnen
-    drawObject1();
-    drawObject2();
+    objectsToRender.forEach(drawObject);
     
     // Render-Loop erneut durchführen (im Regelfall 60fps)
 	requestAnimFrame(render);

@@ -6,6 +6,36 @@ function RenderObject(positionBuffer, colorBuffer, modelMatrix)
     this.modelMatrix = modelMatrix;
 }
 
+/// generiert für eine gegebene Farbe ein einfarbiges Color-Array, das als Color-Buffer verwendet werden kann
+function makeCubeUniColorArray(r,g,b,a)
+{
+    var colorArray = new Float32Array(144);
+    
+    for (var i = 0; i < colorArray.length; i++)
+    {
+        switch (i % 4)
+        {
+                // Rot
+            case 0:
+                colorArray[i] = r;
+                break;
+                // Grün
+            case 1:
+                colorArray[i] = g;
+                break;
+                // Blau
+            case 2:
+                colorArray[i] = b;
+                break;
+                // Alpha
+            case 3:
+                colorArray[i] = a;
+                break;
+        }
+    }
+    return colorArray;
+}
+
 
 // Bodenplatte
 var groundModelMatrix = new Float32Array([1, 0, 0, 0,
@@ -122,8 +152,3 @@ var colors = new Float32Array([0, 0, 1, 1,
                            0, 1, 0.2, 1,
                            0, 1, 0.2, 1
                            ]);
-
-var objectsToRender = [
-       new RenderObject(positions, colors, groundModelMatrix),
-       new RenderObject(positions, colors, cubeModelMatrix)
-];
