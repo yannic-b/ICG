@@ -30,7 +30,7 @@ function setupWebGL(document)
     
     // Viewport konfigurieren
     gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.clearColor(1.0, 1.0, 1.0, 1.0);
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.enable(gl.DEPTH_TEST);
     
     // shader program initilisieren und binden
@@ -175,7 +175,7 @@ function initModels()
 								]);
 }
 
-/// generiert für eine
+/// generiert für eine gegebene Farbe ein einfarbiges Color-Array, das als Color-Buffer verwendet werden kann
 function makeCubeUniColorArray(r,g,b,a)
 {
     var colorArray = new Float32Array(144);
