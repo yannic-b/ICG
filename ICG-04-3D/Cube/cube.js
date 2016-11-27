@@ -16,6 +16,7 @@ var projectionMatrixLoc; var projectionMatrix;
 // Kamera
 var eye; var target; var up;
 
+
 function setupWebGL(document)
 {
     // canvas aus HTML-Dokument
