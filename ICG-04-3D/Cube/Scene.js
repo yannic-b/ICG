@@ -86,7 +86,7 @@ function drawObject(currentObject, index, originalArray)
     gl.uniformMatrix4fv(modelMatrixLoc, false, currentObject.modelMatrix);
     
     // Zeichnen ausführen
-    gl.drawArrays(gl.TRIANGLES, 0, positions.length/3);
+    gl.drawArrays(gl.TRIANGLES, 0, currentObject.positionBuffer.length/3);
 }
 
 function render()
@@ -180,7 +180,7 @@ window.addEventListener("keyup", keyUp);
 // Kann modifiziert werden, um Bewegungsgeschwindigkeit zu ändern
 var speed = 0.05;
 
-//Spezifizierung der Bewegungen:
+// Spezifizierung der Bewegungen:
 function moveForward()
 {
 	var direction = vec3.create();
@@ -192,8 +192,6 @@ function moveForward()
 	vec3.scale(direction, direction, speed*2);
 	vec3.add(eye, direction, eye);
 	vec3.add(target, direction, target);
-	//eye[2] = eye[2] - speed * 2;
-	//target[2] = target[2] - speed * 2;
 }
 function moveLeft()
 {
@@ -208,8 +206,6 @@ function moveLeft()
 	direction[2] = -x[0];
 	vec3.add(eye, direction, eye);
 	vec3.add(target, direction, target);
-	//eye[0] = eye[0] - speed;
-	//target[0] = target[0] - speed;
 }
 function moveBackwards()
 {
@@ -221,8 +217,6 @@ function moveBackwards()
 	vec3.scale(direction, direction, speed);
 	vec3.add(eye, direction, eye);
 	vec3.add(target, direction, target);
-	//eye[2] = eye[2] + speed;
-	//target[2] = target[2] + speed;
 }
 function moveRight()
 {
@@ -237,8 +231,6 @@ function moveRight()
 	direction[2] = x[0];
 	vec3.add(eye, direction, eye);
 	vec3.add(target, direction, target);
-	//eye[0] = eye[0] + speed;
-	//target[0] = target[0] + speed;
 }
 
 //Code zuständig für pointerlock und mousemovement:
