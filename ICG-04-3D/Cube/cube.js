@@ -1,18 +1,16 @@
+// Deklaration der globalen Variablen
 
-//Deklaration der globalen Variablen:
+// globales WebGL-Objekt
 var gl;
-var canvas;
+
+//
+var program;
 
 var positions;
 var colors;
 
-var positionBuffer;
-var colorBuffer;
-var positionBuffer2;
-var colorBuffer2;
-
 var modelMatrixLoc;
-var modelMatrixLoc2;
+
 var modelMatrix;
 var modelMatrix2;
 
@@ -26,132 +24,58 @@ var eye;
 var target;
 var up;
 
-window.onload = function init()
+function setupWebGL(document)
 {
-	// Get canvas and setup webGL
-
-	canvas = document.getElementById("gl-canvas");
-	canvas.width = document.body.clientWidth;
-	canvas.height = document.body.clientHeight;
-
-	gl = WebGLUtils.setupWebGL(canvas);
-	if (!gl) { alert("WebGL isn't available"); }
-
-	// Model initilization
-	initModels();
-
-	// Configure viewport
-
-	gl.viewport(0, 0, canvas.width, canvas.height);
-	gl.clearColor(1.0, 1.0, 1.0, 1.0);
-	gl.enable(gl.DEPTH_TEST);
-
-	// Init shader program and bind it
-
-	var program = initShaders(gl, "vertex-shader", "fragment-shader");
+    // canvas aus HTML-Dokument
+    var canvas = document.getElementById("gl-canvas");
+    // Größe dynamisch an Gerät anpassen
+    canvas.width = document.body.clientWidth;
+    canvas.height = document.body.clientHeight;
+    
+    // WebGL initialisieren
+    gl = WebGLUtils.setupWebGL(canvas);
+    if (!gl) { alert("WebGL isn't available"); }
+    
+    // Viewport konfigurieren
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.clearColor(1.0, 1.0, 1.0, 1.0);
+    gl.enable(gl.DEPTH_TEST);
+    
+    // shader program initilisieren und binden
+    program = initShaders(gl, "vertex-shader", "fragment-shader");
     gl.useProgram(program);
     
     // Set view matrix
-    
-    // Kameraposition:
-    eye = vec3.fromValues(0.0, 1.0, 3.0);
-    // Mittelpunkt - Blickrichtung:
-    target = vec3.fromValues(0.0, 0.0, 0.0);
-    // Kameraneigung:
-    up = vec3.fromValues(0.0, 1.0, 0.0);
-    
     viewMatrix = mat4.create();
-    mat4.lookAt(viewMatrix, eye, target, up);
-    
     viewMatrixLoc = gl.getUniformLocation(program, "viewMatrix");
-    gl.uniformMatrix4fv(viewMatrixLoc, false, viewMatrix);
     
     // Set projection matrix
-    
     projectionMatrix = mat4.create();
     mat4.perspective(projectionMatrix, Math.PI * 0.25, canvas.width / canvas.height, 0.5, 100);
-    
     projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix");
-    gl.uniformMatrix4fv(projectionMatrixLoc, false, projectionMatrix);
-    
-    
-    
-    
 
-    // Load positions into the GPU and associate shader variables
+    // initiale Kameraposition einstellen
+    eye = vec3.fromValues(0.0, 1.0, 3.0);
+    // Mittelpunkt - Blickrichtung
+    target = vec3.fromValues(0.0, 0.0, 0.0);
+    // Kameraneigung
+    up = vec3.fromValues(0.0, 1.0, 0.0);
+}
 
-	positionBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-	gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
-
-	var vPosition = gl.getAttribLocation(program, "vPosition");
-	gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
-	gl.enableVertexAttribArray(vPosition);
-
-	// Load colors into the GPU and associate shader variables
-
-	colorBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-	gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
-
-	var vColor = gl.getAttribLocation(program, "vColor");
-	gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
-	gl.enableVertexAttribArray(vColor);
-
-	// Set model matrix
+window.onload = function init()
+{
+	// Models initialisieren
+	initModels();
 	
-	//
-	// Bodenplatte:
-	modelMatrix = new Float32Array([1, 0, 0, 0,
-									0, 0.001, 0, 0,
-									0, 0, 1, 0,
-									0, 0, 0, 0.1]);
-									//*/
-
-	modelMatrixLoc = gl.getUniformLocation(program, "modelMatrix");
-	gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
+    // WebGL initialisieren
+    setupWebGL(document);
     
-    
-    
-    
-    
-    // Load positions into the GPU and associate shader variables
-    
-    positionBuffer2 = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer2);
-    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
-    
-    var vPosition2 = gl.getAttribLocation(program, "vPosition");
-    gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(vPosition);
-    
-    // Load colors into the GPU and associate shader variables
-    
-    colorBuffer2 = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer2);
-    gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
-    
-    var vColor2 = gl.getAttribLocation(program, "vColor");
-    gl.vertexAttribPointer(vColor2, 4, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(vColor2);
-    
-    // Set model matrix
-    
-    // Würfel:
-    modelMatrix2 = new Float32Array([1, 0, 0, 0,
-                                     0, 1, 0, 0,
-                                     0, 0, 1, 0,
-                                     0, 0, 0, 1]);
-    
-    modelMatrixLoc2 = gl.getUniformLocation(program, "modelMatrix");
-    gl.uniformMatrix4fv(modelMatrixLoc2, false, modelMatrix2);
-    
-  
-
+    // Render-Loop beginnen
 	render();
 };
 
-function initModels() {
+function initModels()
+{
 	// Specify position and color of the vertices
 
 									 // Front
@@ -259,8 +183,78 @@ function initModels() {
 								]);
 }
 
+function drawObject1()
+{
+    // Position
+    var positionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+    
+    var vPosition = gl.getAttribLocation(program, "vPosition");
+    gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vPosition);
+    
+    // Load colors into the GPU and associate shader variables
+    
+    var colorBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
+    
+    var vColor = gl.getAttribLocation(program, "vColor");
+    gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vColor);
+    
+    // Model
+    // Bodenplatte
+    modelMatrix = new Float32Array([1, 0, 0, 0,
+                                    0, 0.001, 0, 0,
+                                    0, 0, 1, 0,
+                                    0, 0, 0, 0.1]);
+    modelMatrixLoc = gl.getUniformLocation(program, "modelMatrix");
+    gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
+    
+    // Zeichnen ausführen
+    gl.drawArrays(gl.TRIANGLES, 0, positions.length/3);
+}
+
+function drawObject2()
+{
+    // Position
+    var positionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+    
+    var vPosition = gl.getAttribLocation(program, "vPosition");
+    gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vPosition);
+    
+    // Color
+    var colorBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
+    
+    var vColor = gl.getAttribLocation(program, "vColor");
+    gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vColor);
+    
+    // Model
+    // Würfel
+    var modelMatrix = new Float32Array([1, 0, 0, 0,
+                                        0, 1, 0, 0,
+                                        0, 0, 1, 0,
+                                        0, 0, 0, 1]);
+    modelMatrixLoc = gl.getUniformLocation(program, "modelMatrix");
+    gl.uniformMatrix4fv(modelMatrixLoc, false, modelMatrix);
+    
+    // Zeichnen ausführen
+    gl.drawArrays(gl.TRIANGLES, 0, positions.length/3);
+}
+
 function render()
 {
+    // zuerst die Buffer leeren
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    
 	// Hier wird die Bewegung ausgeführt
 	if (isDown[0])
 	{
@@ -278,15 +272,19 @@ function render()
 	{
 		moveRight();
 	}
-
+    
+    // nach Bewegung Blickrichtung der Kamera aktualisieren
 	mat4.lookAt(viewMatrix, eye, target, up);
     
-	gl.uniformMatrix4fv(viewMatrixLoc, false, viewMatrix);
-	gl.uniformMatrix4fv(projectionMatrixLoc, false, projectionMatrix);
-
-	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-	gl.drawArrays(gl.TRIANGLES, 0, positions.length/3);
-
+    // viewMatrix und projectionMatrix übergeben
+    gl.uniformMatrix4fv(viewMatrixLoc, false, viewMatrix);
+    gl.uniformMatrix4fv(projectionMatrixLoc, false, projectionMatrix);
+    
+    // Objekte zeichnen
+    drawObject1();
+    drawObject2();
+    
+    // Render-Loop erneut durchführen (im Regelfall 60fps)
 	requestAnimFrame(render);
 }
 
