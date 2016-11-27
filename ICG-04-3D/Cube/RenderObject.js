@@ -152,3 +152,12 @@ var colors = new Float32Array([0, 0, 1, 1,
                            0, 1, 0.2, 1,
                            0, 1, 0.2, 1
                            ]);
+
+// 3D-Objekte, die präsentiert werden
+var objectsToRender =
+[
+ // grüner Boden
+ new RenderObject(positions, makeCubeUniColorArray(0, 0.9, 0.1, 1), groundModelMatrix),
+ // roter Würfel
+ new RenderObject(positions, makeCubeUniColorArray(1.0, 0, 0, 1), cubeModelMatrix)
+];

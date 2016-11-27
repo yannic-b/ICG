@@ -13,12 +13,6 @@ var projectionMatrixLoc; var projectionMatrix;
 // Kamera
 var eye; var target; var up;
 
-// 3D-Objekte, die präsentiert werden (für die Parameter siehe RenderObject.js)
-var objectsToRender = [
-    new RenderObject(positions, colors, groundModelMatrix),
-    new RenderObject(positions, colors, cubeModelMatrix)
-];
-
 
 window.onload = function init()
 {
@@ -125,7 +119,7 @@ function render()
     gl.uniformMatrix4fv(viewMatrixLoc, false, viewMatrix);
     gl.uniformMatrix4fv(projectionMatrixLoc, false, projectionMatrix);
     
-    // Objekte zeichnen
+    // Objekte zeichnen (Definition der Objekte s. RenderObject.js)
     objectsToRender.forEach(drawObject);
     
     // Render-Loop erneut durchführen (im Regelfall 60fps)
