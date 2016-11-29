@@ -4,6 +4,8 @@
 		<meta charset="utf-8"/>
 		<title>Zettel 6 - Aufgabe 1</title>
 
+		<link rel="stylesheet" href="styles.css">
+
 		<script id="vertex-shader" type="x-shader/x-vertex">
 			attribute vec4 vPosition;
 			attribute vec4 vColor;
@@ -39,12 +41,14 @@
 		<script type="text/javascript" src="Scene.js">
 		</script>
         <script type="text/javascript" src="RenderObject.js">
-            </script>
+    </script>
 	</head>
 	<body>
-
+		<div id="infoBox">
+			<h3>Press Enter to enable PointerLock</h3>
+		</div>
 		<!-- wird per javascript überschrieben, sodass canvas sich an Bildschirmgröße anpasst -->
-		<canvas id="gl-canvas" width="2560" height="1600">
+		<canvas id="gl-canvas" width="1280" height="720">
 			If you see this, your browser doesn't support WebGL.
 		</canvas>
 

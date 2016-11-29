@@ -1,7 +1,4 @@
 body {
-    background: #2A2B3C;
-    padding: 0px;
-    margin: 0px;
     -webkit-font-smoothing: antialiased !important;
     font-family: 'Open Sans', sans-serif;
     font-weight: 400;
@@ -9,13 +6,26 @@ body {
 
 h1 {
     color: slategrey;
-    text-align: left;
+    text-align: center;
     font-size: 30px;
     font-weight: 400;
     -webkit-font-smoothing: antialiased !important;
     color: rgba(255,255,255,0.3);
 }
 
-canvas {
-    position:absolute;
+h3 {
+  color: ghostwhite;
+  text-align: center;
+  font-size: 25px;
+  font-weight: 100;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+#infoBox {
+  background-color: rgba(10, 10, 10, 0.1);
+  width: 100%;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  display: block;
 }

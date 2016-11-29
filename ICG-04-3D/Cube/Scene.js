@@ -13,12 +13,19 @@ var projectionMatrixLoc; var projectionMatrix;
 // Kamera
 var eye; var target; var up;
 
+//WebGL viewport
+var canvas;
+
+var havePointerLock;
 
 window.onload = function init()
 {
     // WebGL initialisieren
     setupWebGL(document);
-    
+
+    //pointer lock initialisieren
+    setUpPointerLock();
+
     // Render-Loop beginnen
 	render();
 };
@@ -26,37 +33,37 @@ window.onload = function init()
 function setupWebGL(document)
 {
     // canvas aus HTML-Dokument
-    var canvas = document.getElementById("gl-canvas");
+    canvas = document.getElementById("gl-canvas");
     // Größe dynamisch an Gerät anpassen
-    canvas.width = document.body.clientWidth;
-    canvas.height = document.body.clientHeight;
-    
+    canvas.width = window.innerWidth - 21;
+    canvas.height = window.innerHeight - 21;
+
     // WebGL initialisieren
     gl = WebGLUtils.setupWebGL(canvas);
     if (!gl) { alert("WebGL isn't available"); }
-    
+
     // Viewport konfigurieren
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.enable(gl.DEPTH_TEST);
-    
+
     // shader program initilisieren und binden
     program = initShaders(gl, "vertex-shader", "fragment-shader");
     gl.useProgram(program);
-    
+
     // Set view matrix
     viewMatrix = mat4.create();
     viewMatrixLoc = gl.getUniformLocation(program, "viewMatrix");
-    
+
     // Set projection matrix
     projectionMatrix = mat4.create();
     mat4.perspective(projectionMatrix, Math.PI * 0.25, canvas.width / canvas.height, 0.5, 100);
     projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix");
-    
+
     // initiale Kameraposition einstellen
-    eye = vec3.fromValues(0.0, 1.0, 3.0);
+    eye = vec3.fromValues(0.0, 0.1, 1.0);
     // Mittelpunkt - Blickrichtung
-    target = vec3.fromValues(0.0, 0.0, 0.0);
+    target = vec3.fromValues(0.0, 0.1, 0.0);
     // Kameraneigung
     up = vec3.fromValues(0.0, 1.0, 0.0);
 }
@@ -68,23 +75,23 @@ function drawObject(currentObject, index, originalArray)
     var positionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, currentObject.positionBuffer, gl.STATIC_DRAW);
-    
+
     var vPosition = gl.getAttribLocation(program, "vPosition");
     gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vPosition);
-    
+
     // Color
     var colorBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, currentObject.colorBuffer, gl.STATIC_DRAW);
-    
+
     var vColor = gl.getAttribLocation(program, "vColor");
     gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vColor);
-    
+
     var modelMatrixLoc = gl.getUniformLocation(program, "modelMatrix");
     gl.uniformMatrix4fv(modelMatrixLoc, false, currentObject.modelMatrix);
-    
+
     // Zeichnen ausführen
     gl.drawArrays(gl.TRIANGLES, 0, currentObject.positionBuffer.length/3);
 }
@@ -93,7 +100,7 @@ function render()
 {
     // zuerst die Buffer leeren
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    
+
 	// Hier wird die Bewegung ausgeführt
 	if (isDown[0])
 	{
@@ -111,20 +118,50 @@ function render()
 	{
 		moveRight();
 	}
-    
-    // nach Bewegung Blickrichtung der Kamera aktualisieren
+
+  // nach Bewegung Blickrichtung der Kamera aktualisieren
 	mat4.lookAt(viewMatrix, eye, target, up);
-    
-    // viewMatrix und projectionMatrix übergeben
-    gl.uniformMatrix4fv(viewMatrixLoc, false, viewMatrix);
-    gl.uniformMatrix4fv(projectionMatrixLoc, false, projectionMatrix);
-    
-    // Objekte zeichnen (Definition der Objekte s. RenderObject.js)
-    objectsToRender.forEach(drawObject);
-    
-    // Render-Loop erneut durchführen (im Regelfall 60fps)
+
+  // viewMatrix und projectionMatrix übergeben
+  gl.uniformMatrix4fv(viewMatrixLoc, false, viewMatrix);
+  gl.uniformMatrix4fv(projectionMatrixLoc, false, projectionMatrix);
+
+  // Objekte zeichnen (Definition der Objekte s. RenderObject.js)
+  objectsToRender.forEach(drawObject);
+
+  // Render-Loop erneut durchführen (im Regelfall 60fps)
 	requestAnimFrame(render);
 }
+
+function keyPressed(e)
+{
+  //wvar infoBox = document.getElementById("infoBox");
+  switch (e.keyCode)
+  {
+    //Enter
+    case 13:
+      enablePointerLock();
+      break;
+    //Escape
+    case 27:
+      //Keine Ahnung warum das hier nicht funktioniert...
+      infoBox.style.visibility = 'visible';
+      break;
+    default:
+  }
+
+  function enablePointerLock()
+  {
+    //if (havePointerLock) {
+      canvas.requestPointerLock = canvas.requestPointerLock ||
+                                  canvas.mozRequestPointerLock ||
+                                  canvas.webkitRequestPointerLock;
+      canvas.requestPointerLock();
+      infoBox.style.visibility = 'hidden';
+    //}
+  }
+}
+window.addEventListener("keypress", keyPressed);
 
 // W, A, S, D
 var isDown = [false, false, false, false];
@@ -233,22 +270,42 @@ function moveRight()
 	vec3.add(target, direction, target);
 }
 
+function updateViewingDirection(e)
+{
+  var movementX = e.movementX ||
+      e.mozMovementX ||
+      e.webkitMovementX ||
+      0,
+  angleY = -movementX * 0.0025;/// (2 * Math.PI);
+  console.log("mousemove x: "+angleY);
+  vec3.rotateY(target, target, eye, angleY);
+}
+
 //Code zuständig für pointerlock und mousemovement:
-//WIP
-/*
-document.addEventListener('pointerlockchange', lockChangeAlert, false);
-document.addEventListener('mozpointerlockchange', lockChangeAlert, false);
-document.addEventListener('webkitpointerlockchange', lockChangeAlert, false);
+function setUpPointerLock()
+{
+  canvas.addEventListener('pointerlockchange', lockChangeAlert, false);
+  canvas.addEventListener('mozpointerlockchange', lockChangeAlert, false);
+  canvas.addEventListener('webkitpointerlockchange', lockChangeAlert, false);
 
-canvas.requestPointerLock = canvas.requestPointerLock ||
-                            canvas.mozRequestPointerLock ||
-														canvas.webkitRequestPointerLock;
-//canvas.requestPointerLock();
+  /*
+  document.exitPointerLock = document.exitPointerLock ||
+                             document.mozExitPointerLock ||
+  													 document.webkitExitPointerLock;
+  //canvas.exitPointerLock();
+  */
 
-document.exitPointerLock = document.exitPointerLock ||
-                           document.mozExitPointerLock ||
-													 document.webkitExitPointerLock;
-//canvas.exitPointerLock();
+  havePointerLock = 'pointerLockElement' in document ||
+    'mozPointerLockElement' in document ||
+    'webkitPointerLockElement' in document;
+
+
+  document.addEventListener('pointerlockerror', errorCallback, false);
+  document.addEventListener('mozpointerlockerror', errorCallback, false);
+  document.addEventListener('webkitpointerlockerror', errorCallback, false);
+
+  document.addEventListener("mousemove", updateViewingDirection, false);
+}
 
 function lockChangeAlert()
 {
@@ -263,8 +320,7 @@ function lockChangeAlert()
   }
 }
 
-function updateViewingPosition(e)
+function errorCallback()
 {
-
+  console.log("Error");
 }
-*/
