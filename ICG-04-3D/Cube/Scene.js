@@ -18,17 +18,48 @@ var canvas;
 
 var havePointerLock;
 
+var objects = [];
+var modelMatrixLoc;
+var colorLoc;
+var positionLoc;
+
 window.onload = function init()
 {
     // WebGL initialisieren
     setupWebGL(document);
+    
+    // Objekte initilisieren
+    initObjects();
 
     //pointer lock initialisieren
     setUpPointerLock();
-
+    
     // Render-Loop beginnen
 	render();
 };
+
+function initObjects()
+{
+    ///// Car and Tree OBJECT /////
+    
+    // Create buffer and copy data into it
+    var carAndTreeString = document.getElementById("car-and-tree").innerHTML;
+    carAndTreeMesh = new OBJ.Mesh(carAndTreeString);
+    OBJ.initMeshBuffers(gl, carAndTreeMesh);
+    
+    // Create object
+    var carAndTreeObject = new RenderObject(mat4.create(), vec4.fromValues(0.5, 0.7, 0, 1), carAndTreeMesh.vertexBuffer, carAndTreeMesh.indexBuffer);
+    mat4.translate(carAndTreeObject.modelMatrix, carAndTreeObject.modelMatrix, vec3.fromValues(0, 0, 0));
+    
+    // Push object on the stack
+    objects.push(carAndTreeObject);
+    
+    // Store locations of object-specific uniform and attribute variables
+    
+    modelMatrixLoc = gl.getUniformLocation(program, "modelMatrix");
+    colorLoc = gl.getUniformLocation(program, "objectColor");
+    positionLoc = gl.getAttribLocation(program, "vPosition");
+}
 
 function setupWebGL(document)
 {
@@ -61,7 +92,7 @@ function setupWebGL(document)
     projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix");
 
     // initiale Kameraposition einstellen
-    eye = vec3.fromValues(0.0, 0.1, 1.0);
+    eye = vec3.fromValues(0.0, 0.1, 2.0);
     // Mittelpunkt - Blickrichtung
     target = vec3.fromValues(0.0, 0.1, 0.0);
     // Kameraneigung
@@ -69,31 +100,20 @@ function setupWebGL(document)
 }
 
 
-function drawObject(currentObject, index, originalArray)
+function drawObject(object, index, originalArray)
 {
-    // Position
-    var positionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, currentObject.positionBuffer, gl.STATIC_DRAW);
-
-    var vPosition = gl.getAttribLocation(program, "vPosition");
-    gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(vPosition);
-
-    // Color
-    var colorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, currentObject.colorBuffer, gl.STATIC_DRAW);
-
-    var vColor = gl.getAttribLocation(program, "vColor");
-    gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(vColor);
-
-    var modelMatrixLoc = gl.getUniformLocation(program, "modelMatrix");
-    gl.uniformMatrix4fv(modelMatrixLoc, false, currentObject.modelMatrix);
-
-    // Zeichnen ausführen
-    gl.drawArrays(gl.TRIANGLES, 0, currentObject.positionBuffer.length/3);
+    // Set attributes
+    gl.bindBuffer(gl.ARRAY_BUFFER, object.vertexBuffer);
+    gl.vertexAttribPointer(positionLoc, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(positionLoc);
+    
+    // Set uniforms
+    gl.uniformMatrix4fv(modelMatrixLoc, false, object.modelMatrix);
+    gl.uniform4fv(colorLoc, object.color);
+    
+    // Draw
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, object.indexBuffer);
+    gl.drawElements(gl.TRIANGLES, object.numVertices, gl.UNSIGNED_SHORT, 0);
 }
 
 function render()
@@ -119,18 +139,18 @@ function render()
 		moveRight();
 	}
 
-  // nach Bewegung Blickrichtung der Kamera aktualisieren
+    // nach Bewegung Blickrichtung der Kamera aktualisieren
 	mat4.lookAt(viewMatrix, eye, target, up);
 
-  // viewMatrix und projectionMatrix übergeben
-  gl.uniformMatrix4fv(viewMatrixLoc, false, viewMatrix);
-  gl.uniformMatrix4fv(projectionMatrixLoc, false, projectionMatrix);
+    // viewMatrix und projectionMatrix übergeben
+    gl.uniformMatrix4fv(viewMatrixLoc, false, viewMatrix);
+    gl.uniformMatrix4fv(projectionMatrixLoc, false, projectionMatrix);
 
-  // Objekte zeichnen (Definition der Objekte s. RenderObject.js)
-  objectsToRender.forEach(drawObject);
+    // Objekte zeichnen (Definition der Objekte s. RenderObject.js)
+    objects.forEach(drawObject);
 
-  // Render-Loop erneut durchführen (im Regelfall 60fps)
-	requestAnimFrame(render);
+    // Render-Loop erneut durchführen (im Regelfall 60fps)
+    requestAnimFrame(render);
 }
 
 function keyPressed(e)

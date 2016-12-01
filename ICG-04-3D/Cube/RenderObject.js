@@ -1,9 +1,11 @@
 // Render-Objekt mit
-function RenderObject(positionBuffer, colorBuffer, modelMatrix)
+var RenderObject = function(modelMatrix, color, vertexBuffer, indexBuffer)
 {
-    this.positionBuffer = positionBuffer;
-    this.colorBuffer = colorBuffer;
     this.modelMatrix = modelMatrix;
+    this.color = color;
+    this.vertexBuffer = vertexBuffer;
+    this.indexBuffer = indexBuffer;
+    this.numVertices = indexBuffer.numItems;
 }
 
 /// generiert für eine gegebene Farbe ein einfarbiges Color-Array, das als Color-Buffer verwendet werden kann
@@ -269,13 +271,13 @@ var colors = new Float32Array([0, 0, 1, 1,
                            0, 1, 0.2, 1
                            ]);
 
-// 3D-Objekte, die präsentiert werden
-var objectsToRender =
-[
- // grüner Boden
- new RenderObject(groundPositions, makeCubeUniColorArray(0, 0.9, 0.1, 1), groundModelMatrix),
- // roter Würfel
- new RenderObject(cubePositions1, makeCubeUniColorArray(1.0, 0, 0, 1), cubeModelMatrix),
- // blaue Figur
- new RenderObject(cubePositions2, makeCubeUniColorArray(0, 0, 1.0, 1), polygonModelMatrix),
-];
+//// 3D-Objekte, die präsentiert werden
+//var objectsToRender =
+//[
+// // grüner Boden
+// new RenderObject(groundModelMatrix, (0, 0.9, 0.1, 1), groundPositions),
+// // roter Würfel
+// new RenderObject(cubeModelMatrix, (1.0, 0, 0, 1), cubePositions1),
+// // blaue Figur
+// new RenderObject(cubeModelMatrix, (0, 0, 1.0, 1), cubePositions1),
+//];
