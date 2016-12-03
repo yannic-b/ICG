@@ -23,7 +23,7 @@ var modelMatrixLoc;
 var colorLoc;
 var positionLoc;
 
-window.onload = window.onresize = function init()
+window.onload = function init()
 {
     // WebGL initialisieren
     setupWebGL(document);
@@ -118,7 +118,7 @@ function drawObject(object, index, originalArray)
 
 function render()
 {
-  gl.viewport(0, 0, canvas.width, canvas.height);
+
   // zuerst die Buffer leeren
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -346,12 +346,24 @@ function rotateVertically(angleXZ)
 }
 
 //resize handler:
-/*
+
 window.onresize = function resize()
 {
   canvas.width = window.innerWidth - 21;
   canvas.height = window.innerHeight - 21;
-} */
+  gl.viewport(0, 0, canvas.width, canvas.height);
+  gl.clearColor(0.0, 0.0, 0.0, 1.0);
+  gl.enable(gl.DEPTH_TEST);
+
+  // Set view matrix
+  viewMatrix = mat4.create();
+  viewMatrixLoc = gl.getUniformLocation(program, "viewMatrix");
+
+  // Set projection matrix
+  projectionMatrix = mat4.create();
+  mat4.perspective(projectionMatrix, Math.PI * 0.25, canvas.width / canvas.height, 0.5, 100);
+  projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix");
+}
 
 //Fullscreen:
 function toggleFullScreen() {
