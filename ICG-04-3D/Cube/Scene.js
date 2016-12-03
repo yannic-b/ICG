@@ -378,8 +378,8 @@ window.onresize = function resize()
   canvas.width = window.innerWidth - 21;
   canvas.height = window.innerHeight - 21;
   gl.viewport(0, 0, canvas.width, canvas.height);
-  gl.clearColor(0.0, 0.0, 0.0, 1.0);
-  gl.enable(gl.DEPTH_TEST);
+  gl.clearColor(0.1, 0.1, 0.9, 0.75);
+  //gl.enable(gl.DEPTH_TEST);
 
   // Set view matrix
   viewMatrix = mat4.create();
