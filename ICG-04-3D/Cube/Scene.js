@@ -13,11 +13,12 @@ var projectionMatrixLoc; var projectionMatrix;
 // Kamera
 var eye; var target; var up;
 
-//WebGL viewport
+// WebGL viewport
 var canvas;
 
 var havePointerLock;
 
+// zu rendernde Objekte
 var objects = [];
 var modelMatrixLoc;
 var colorLoc;
@@ -40,22 +41,28 @@ window.onload = function init()
 
 function initObjects()
 {
-    ///// Car and Tree OBJECT /////
+    // ID, Farbe, Position
+    
+    initObject("car-and-tree", vec4.fromValues(0.9, 0.2, 0.1, 1), vec3.fromValues(10, -5, 0));
+    initObject("house", vec4.fromValues(0.6, 0.4, 0.2, 1), vec3.fromValues(0, -5, 0));
+    initObject("ground", vec4.fromValues(0.2, 0.9, 0.1, 1), vec3.fromValues(0, 0, 0));
+}
 
+function initObject(id, color, pos)
+{
     // Create buffer and copy data into it
-    var carAndTreeString = document.getElementById("car-and-tree").innerHTML;
+    var carAndTreeString = document.getElementById(id).innerHTML;
     carAndTreeMesh = new OBJ.Mesh(carAndTreeString);
     OBJ.initMeshBuffers(gl, carAndTreeMesh);
 
     // Create object
-    var carAndTreeObject = new RenderObject(mat4.create(), vec4.fromValues(0.5, 0.7, 0, 1), carAndTreeMesh.vertexBuffer, carAndTreeMesh.indexBuffer);
-    mat4.translate(carAndTreeObject.modelMatrix, carAndTreeObject.modelMatrix, vec3.fromValues(0, 0, 0));
+    var carAndTreeObject = new RenderObject(mat4.create(), color, carAndTreeMesh.vertexBuffer, carAndTreeMesh.indexBuffer, carAndTreeMesh.normalBuffer);
+    mat4.translate(carAndTreeObject.modelMatrix, carAndTreeObject.modelMatrix, pos);
 
     // Push object on the stack
     objects.push(carAndTreeObject);
 
     // Store locations of object-specific uniform and attribute variables
-
     modelMatrixLoc = gl.getUniformLocation(program, "modelMatrix");
     colorLoc = gl.getUniformLocation(program, "objectColor");
     positionLoc = gl.getAttribLocation(program, "vPosition");
@@ -66,8 +73,8 @@ function setupWebGL(document)
     // canvas aus HTML-Dokument
     canvas = document.getElementById("gl-canvas");
     // Größe dynamisch an Gerät anpassen
-    canvas.width = window.innerWidth - 21;
-    canvas.height = window.innerHeight - 21;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
     // WebGL initialisieren
     gl = WebGLUtils.setupWebGL(canvas);
@@ -75,7 +82,7 @@ function setupWebGL(document)
 
     // Viewport konfigurieren
     gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clearColor(0.1, 0.1, 0.9, 0.75);
     gl.enable(gl.DEPTH_TEST);
 
     // shader program initilisieren und binden
@@ -92,7 +99,7 @@ function setupWebGL(document)
     projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix");
 
     // initiale Kameraposition einstellen
-    eye = vec3.fromValues(0.0, 0.1, 2.0);
+    eye = vec3.fromValues(10.0, 0.0, 20.0);
     // Mittelpunkt - Blickrichtung
     target = vec3.fromValues(0.0, 0.1, 0.0);
     // Kameraneigung
@@ -107,6 +114,11 @@ function drawObject(object, index, originalArray)
     gl.vertexAttribPointer(positionLoc, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(positionLoc);
 
+    gl.bindBuffer(gl.ARRAY_BUFFER, object.normalBuffer);
+    var normalAttribLocation = gl.getAttribLocation(program, "vertNormal");
+    gl.vertexAttribPointer(normalAttribLocation, 3, gl.FLOAT, gl.TRUE, 3 * Float32Array.BYTES_PER_ELEMENT, 0);
+    gl.enableVertexAttribArray(normalAttribLocation);
+    
     // Set uniforms
     gl.uniformMatrix4fv(modelMatrixLoc, false, object.modelMatrix);
     gl.uniform4fv(colorLoc, object.color);
@@ -313,7 +325,7 @@ function updateViewingDirection(e)
       e.mozMovementY ||
       e.webkitMovementY ||
       0;
-  angleXZ = -movementY * 0.0025;/// (2 * Math.PI);
+  angleXZ = -movementY * 0.00025;/// (2 * Math.PI);
   rotateVertically(angleXZ);
 
   console.log("mousemove x: "+angleY+" mousemove y: "+angleXZ);
