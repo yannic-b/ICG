@@ -42,21 +42,22 @@ window.onload = function init()
 function initObjects()
 {
     // ID, Farbe, Position
+    var numberOfBalloons = 1000;
 
     initObject("car-and-tree", vec4.fromValues(0.9, 0.2, 0.1, 1), vec3.fromValues(10, -5, 0));
     initObject("house", vec4.fromValues(0.6, 0.4, 0.2, 1), vec3.fromValues(0, -5, 0));
     initObject("ground", vec4.fromValues(0.2, 0.9, 0.1, 1), vec3.fromValues(0, 0, 0));
 
-    for (var i = 0; i < 100; i++)
+    for (var i = 0; i < numberOfBalloons; i++)
     {
       initObject("balloon",
                 vec4.fromValues(Math.random(),
                                 Math.random(),
                                 Math.random(),
                                 1),
-                vec3.fromValues(Math.random() * 100 - 50,
-                                Math.random() * 10 + 5,
-                                Math.random() * 100 - 50));
+                vec3.fromValues(Math.random() * 250 - 125,
+                                Math.random() * 42 + 5,
+                                Math.random() * 250 - 125));
     }
     //initObject("balloon", vec4.fromValues(1.0, 0.1, 0.1, 1), vec3.fromValues(0, 5, 0));
 }
