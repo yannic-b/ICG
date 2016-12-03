@@ -42,10 +42,23 @@ window.onload = function init()
 function initObjects()
 {
     // ID, Farbe, Position
-    
+
     initObject("car-and-tree", vec4.fromValues(0.9, 0.2, 0.1, 1), vec3.fromValues(10, -5, 0));
     initObject("house", vec4.fromValues(0.6, 0.4, 0.2, 1), vec3.fromValues(0, -5, 0));
     initObject("ground", vec4.fromValues(0.2, 0.9, 0.1, 1), vec3.fromValues(0, 0, 0));
+
+    for (var i = 0; i < 100; i++)
+    {
+      initObject("balloon",
+                vec4.fromValues(Math.random(),
+                                Math.random(),
+                                Math.random(),
+                                1),
+                vec3.fromValues(Math.random() * 100 - 50,
+                                Math.random() * 10 + 5,
+                                Math.random() * 100 - 50));
+    }
+    //initObject("balloon", vec4.fromValues(1.0, 0.1, 0.1, 1), vec3.fromValues(0, 5, 0));
 }
 
 function initObject(id, color, pos)
@@ -101,7 +114,7 @@ function setupWebGL(document)
     // initiale Kameraposition einstellen
     eye = vec3.fromValues(10.0, 0.0, 20.0);
     // Mittelpunkt - Blickrichtung
-    target = vec3.fromValues(0.0, 0.1, 0.0);
+    target = vec3.fromValues(0.0, 0.0, 0.0);
     // Kameraneigung
     up = vec3.fromValues(0.0, 1.0, 0.0);
 }
@@ -118,7 +131,7 @@ function drawObject(object, index, originalArray)
     var normalAttribLocation = gl.getAttribLocation(program, "vertNormal");
     gl.vertexAttribPointer(normalAttribLocation, 3, gl.FLOAT, gl.TRUE, 3 * Float32Array.BYTES_PER_ELEMENT, 0);
     gl.enableVertexAttribArray(normalAttribLocation);
-    
+
     // Set uniforms
     gl.uniformMatrix4fv(modelMatrixLoc, false, object.modelMatrix);
     gl.uniform4fv(colorLoc, object.color);
@@ -251,7 +264,7 @@ function keyUp(e)
 window.addEventListener("keyup", keyUp);
 
 // Kann modifiziert werden, um Bewegungsgeschwindigkeit zu ändern
-var speed = 0.05;
+var speed = 0.1;
 
 // Spezifizierung der Bewegungen:
 function moveForward()
