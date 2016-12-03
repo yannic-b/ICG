@@ -23,17 +23,17 @@ var modelMatrixLoc;
 var colorLoc;
 var positionLoc;
 
-window.onload = function init()
+window.onload = window.onresize = function init()
 {
     // WebGL initialisieren
     setupWebGL(document);
-    
+
     // Objekte initilisieren
     initObjects();
 
     //pointer lock initialisieren
     setUpPointerLock();
-    
+
     // Render-Loop beginnen
 	render();
 };
@@ -41,21 +41,21 @@ window.onload = function init()
 function initObjects()
 {
     ///// Car and Tree OBJECT /////
-    
+
     // Create buffer and copy data into it
     var carAndTreeString = document.getElementById("car-and-tree").innerHTML;
     carAndTreeMesh = new OBJ.Mesh(carAndTreeString);
     OBJ.initMeshBuffers(gl, carAndTreeMesh);
-    
+
     // Create object
     var carAndTreeObject = new RenderObject(mat4.create(), vec4.fromValues(0.5, 0.7, 0, 1), carAndTreeMesh.vertexBuffer, carAndTreeMesh.indexBuffer);
     mat4.translate(carAndTreeObject.modelMatrix, carAndTreeObject.modelMatrix, vec3.fromValues(0, 0, 0));
-    
+
     // Push object on the stack
     objects.push(carAndTreeObject);
-    
+
     // Store locations of object-specific uniform and attribute variables
-    
+
     modelMatrixLoc = gl.getUniformLocation(program, "modelMatrix");
     colorLoc = gl.getUniformLocation(program, "objectColor");
     positionLoc = gl.getAttribLocation(program, "vPosition");
@@ -106,11 +106,11 @@ function drawObject(object, index, originalArray)
     gl.bindBuffer(gl.ARRAY_BUFFER, object.vertexBuffer);
     gl.vertexAttribPointer(positionLoc, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(positionLoc);
-    
+
     // Set uniforms
     gl.uniformMatrix4fv(modelMatrixLoc, false, object.modelMatrix);
     gl.uniform4fv(colorLoc, object.color);
-    
+
     // Draw
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, object.indexBuffer);
     gl.drawElements(gl.TRIANGLES, object.numVertices, gl.UNSIGNED_SHORT, 0);
@@ -118,8 +118,9 @@ function drawObject(object, index, originalArray)
 
 function render()
 {
-    // zuerst die Buffer leeren
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.viewport(0, 0, canvas.width, canvas.height);
+  // zuerst die Buffer leeren
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 	// Hier wird die Bewegung ausgeführt
 	if (isDown[0])
@@ -139,18 +140,20 @@ function render()
 		moveRight();
 	}
 
-    // nach Bewegung Blickrichtung der Kamera aktualisieren
-	mat4.lookAt(viewMatrix, eye, target, up);
+  // nach Bewegung Blickrichtung der Kamera aktualisieren
+  mat4.lookAt(viewMatrix, eye, target, up);
 
-    // viewMatrix und projectionMatrix übergeben
-    gl.uniformMatrix4fv(viewMatrixLoc, false, viewMatrix);
-    gl.uniformMatrix4fv(projectionMatrixLoc, false, projectionMatrix);
+  //console.log("Eye: "+eye+" Target: "+target+" Up: "+up);
 
-    // Objekte zeichnen (Definition der Objekte s. RenderObject.js)
-    objects.forEach(drawObject);
+  // viewMatrix und projectionMatrix übergeben
+  gl.uniformMatrix4fv(viewMatrixLoc, false, viewMatrix);
+  gl.uniformMatrix4fv(projectionMatrixLoc, false, projectionMatrix);
 
-    // Render-Loop erneut durchführen (im Regelfall 60fps)
-    requestAnimFrame(render);
+  // Objekte zeichnen (Definition der Objekte s. RenderObject.js)
+  objects.forEach(drawObject);
+
+  // Render-Loop erneut durchführen (im Regelfall 60fps)
+  requestAnimFrame(render);
 }
 
 function keyPressed(e)
@@ -161,6 +164,7 @@ function keyPressed(e)
     //Enter
     case 13:
       enablePointerLock();
+      toggleFullScreen();
       break;
     //Escape
     case 27:
@@ -249,6 +253,7 @@ function moveForward()
 	vec3.scale(direction, direction, speed*2);
 	vec3.add(eye, direction, eye);
 	vec3.add(target, direction, target);
+  //vec3.add(up, direction, up);
 }
 function moveLeft()
 {
@@ -263,6 +268,7 @@ function moveLeft()
 	direction[2] = -x[0];
 	vec3.add(eye, direction, eye);
 	vec3.add(target, direction, target);
+  //vec3.add(up, direction, up);
 }
 function moveBackwards()
 {
@@ -274,6 +280,7 @@ function moveBackwards()
 	vec3.scale(direction, direction, speed);
 	vec3.add(eye, direction, eye);
 	vec3.add(target, direction, target);
+  //vec3.add(up, direction, up);
 }
 function moveRight()
 {
@@ -288,17 +295,79 @@ function moveRight()
 	direction[2] = x[0];
 	vec3.add(eye, direction, eye);
 	vec3.add(target, direction, target);
+  //vec3.add(up, direction, up);
 }
 
 function updateViewingDirection(e)
 {
+  //Horizontal Movement:
   var movementX = e.movementX ||
       e.mozMovementX ||
       e.webkitMovementX ||
-      0,
+      0;
   angleY = -movementX * 0.0025;/// (2 * Math.PI);
-  console.log("mousemove x: "+angleY);
-  vec3.rotateY(target, target, eye, angleY);
+  rotateHorizontally(angleY);
+
+  //Vertical Movement:
+  var movementY = e.movementY ||
+      e.mozMovementY ||
+      e.webkitMovementY ||
+      0;
+  angleXZ = -movementY * 0.0025;/// (2 * Math.PI);
+  rotateVertically(angleXZ);
+
+  console.log("mousemove x: "+angleY+" mousemove y: "+angleXZ);
+
+  mat4.lookAt(viewMatrix, eye, target, up);
+}
+
+function rotateHorizontally(angleY)
+{
+  var direction = vec3.create();
+	vec3.subtract(direction, target, eye);
+  var q = quat.create();
+  quat.setAxisAngle(q, up, angleY);
+  vec3.transformQuat(direction, direction, q);
+  vec3.add(target, eye, direction);
+}
+
+function rotateVertically(angleXZ)
+{
+  var direction = vec3.create();
+	vec3.subtract(direction, target, eye);
+  var strafeDirection = vec3.create();
+	vec3.cross(strafeDirection, direction, up);
+  var upDirection = vec3.create();
+	vec3.copy(upDirection, up);
+  var q = quat.create();
+  quat.setAxisAngle(q, strafeDirection, angleXZ);
+  vec3.transformQuat(direction, direction, q);
+  vec3.add(target, eye, direction);
+}
+
+//resize handler:
+/*
+window.onresize = function resize()
+{
+  canvas.width = window.innerWidth - 21;
+  canvas.height = window.innerHeight - 21;
+} */
+
+//Fullscreen:
+function toggleFullScreen() {
+    if (!document.mozFullScreen && !document.webkitFullScreen) {
+      if (canvas.mozRequestFullScreen) {
+        canvas.mozRequestFullScreen();
+      } else {
+        canvas.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+      }
+    } else {
+      if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else {
+        document.webkitCancelFullScreen();
+      }
+    }
 }
 
 //Code zuständig für pointerlock und mousemovement:
