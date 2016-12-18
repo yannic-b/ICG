@@ -54,27 +54,48 @@ function initObjects()
                 vec4.fromValues(Math.random(),
                                 Math.random(),
                                 Math.random(),
-                                1),
+                                0.5),
                 vec3.fromValues(Math.random() * 250 - 125,
                                 Math.random() * 42 + 5,
                                 Math.random() * 250 - 125));
     }
-    //initObject("balloon", vec4.fromValues(1.0, 0.1, 0.1, 1), vec3.fromValues(0, 5, 0));
+    
+    initObject("present", vec4.fromValues(1.0, 0.0, 0.0, 1.0), vec3.fromValues(15, -5, 0));
 }
+
+var cubeTexture;
+var cubeImage;
+var texCoords;
 
 function initObject(id, color, pos)
 {
     // Create buffer and copy data into it
-    var carAndTreeString = document.getElementById(id).innerHTML;
-    carAndTreeMesh = new OBJ.Mesh(carAndTreeString);
-    OBJ.initMeshBuffers(gl, carAndTreeMesh);
+    var objectString = document.getElementById(id).innerHTML;
+    objectMesh = new OBJ.Mesh(objectString);
+    OBJ.initMeshBuffers(gl, objectMesh);
 
     // Create object
-    var carAndTreeObject = new RenderObject(mat4.create(), color, carAndTreeMesh.vertexBuffer, carAndTreeMesh.indexBuffer, carAndTreeMesh.normalBuffer);
-    mat4.translate(carAndTreeObject.modelMatrix, carAndTreeObject.modelMatrix, pos);
+    var object = new RenderObject(mat4.create(), color, objectMesh.vertexBuffer, objectMesh.indexBuffer, objectMesh.normalBuffer);
+    mat4.translate(object.modelMatrix, object.modelMatrix, pos);
+    
+    if (id == "present")
+    {
+        cubeTexture = gl.createTexture();
+        cubeImage = new Image();
+        cubeImage.onload = function() {
+            handleTextureLoaded(cubeImage, cubeTexture);
+        }
+        cubeImage.src = "PatternFabric.jpg";
+        
+        function handleTextureLoaded(image, texture) {
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+            gl.generateMipmap(gl.TEXTURE_2D);
+        }
+    }
 
     // Push object on the stack
-    objects.push(carAndTreeObject);
+    objects.push(object);
 
     // Store locations of object-specific uniform and attribute variables
     modelMatrixLoc = gl.getUniformLocation(program, "modelMatrix");
@@ -123,6 +144,23 @@ function setupWebGL(document)
 
 function drawObject(object, index, originalArray)
 {
+    // diese Koordinaten müssen irgendwie aus dem Objekt geladen werden
+    texCoords = [0, 0, 1, 1];
+    
+    // Texture
+    var texBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, texBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, texCoords, gl.STATIC_DRAW);
+    var vTexCoords = gl.getAttribLocation(program, "vTexCoords");
+    gl.vertexAttribPointer(vTexCoords, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vTexCoords)
+    
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, cubeTexture);
+    var mapLoc = gl.getUniformLocation(program, "map");
+    gl.uniform1i(mapLoc, 0);
+    
+    
     // Set attributes
     gl.bindBuffer(gl.ARRAY_BUFFER, object.vertexBuffer);
     gl.vertexAttribPointer(positionLoc, 3, gl.FLOAT, false, 0, 0);
