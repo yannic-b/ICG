@@ -10,6 +10,8 @@ var program;
 var viewMatrixLoc; var viewMatrix;
 var projectionMatrixLoc; var projectionMatrix;
 
+var lightPosition;
+
 // Kamera
 var eye; var target; var up;
 
@@ -23,6 +25,8 @@ var objects = [];
 var modelMatrixLoc;
 var colorLoc;
 var positionLoc;
+
+var cameraPos;
 
 window.onload = function init()
 {
@@ -42,15 +46,15 @@ window.onload = function init()
 function initObjects()
 {
     // ID, Farbe, Position
-    var numberOfBalloons = 1000;
+    var numberOfBalloons = 100;
 
-    initObject("car-and-tree", vec4.fromValues(0.9, 0.2, 0.1, 1), vec3.fromValues(10, -5, 0));
-    initObject("house", vec4.fromValues(0.6, 0.4, 0.2, 1), vec3.fromValues(0, -5, 0));
-    initObject("ground", vec4.fromValues(0.2, 0.9, 0.1, 1), vec3.fromValues(0, 0, 0));
+    initObject("car-and-tree", 2.0, vec4.fromValues(0.9, 0.2, 0.1, 1), vec3.fromValues(15, -5.4, 0));
+    initObject("house", 1.0, vec4.fromValues(0.6, 0.4, 0.2, 1), vec3.fromValues(0, -5, 0));
+    initObject("ground", 1.0, vec4.fromValues(0.2, 0.9, 0.1, 1), vec3.fromValues(0, 4.5, 0));
 
     for (var i = 0; i < numberOfBalloons; i++)
     {
-      initObject("balloon",
+      initObject("balloon", 0.5,
                 vec4.fromValues(Math.random(),
                                 Math.random(),
                                 Math.random(),
@@ -62,7 +66,7 @@ function initObjects()
     //initObject("balloon", vec4.fromValues(1.0, 0.1, 0.1, 1), vec3.fromValues(0, 5, 0));
 }
 
-function initObject(id, color, pos)
+function initObject(id, scale, color, pos)
 {
     // Create buffer and copy data into it
     var carAndTreeString = document.getElementById(id).innerHTML;
@@ -71,7 +75,8 @@ function initObject(id, color, pos)
 
     // Create object
     var carAndTreeObject = new RenderObject(mat4.create(), color, carAndTreeMesh.vertexBuffer, carAndTreeMesh.indexBuffer, carAndTreeMesh.normalBuffer);
-    mat4.translate(carAndTreeObject.modelMatrix, carAndTreeObject.modelMatrix, pos);
+    mat4.fromScaling(carAndTreeObject.modelMatrix, vec3.fromValues(scale, scale, scale));
+    mat4.translate(carAndTreeObject.modelMatrix, carAndTreeObject.modelMatrix, vec3.scale(pos, pos, 1/scale));
 
     // Push object on the stack
     objects.push(carAndTreeObject);
@@ -111,6 +116,12 @@ function setupWebGL(document)
     projectionMatrix = mat4.create();
     mat4.perspective(projectionMatrix, Math.PI * 0.25, canvas.width / canvas.height, 0.5, 100);
     projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix");
+
+    cameraPos = gl.getUniformLocation(program, "cameraPos");
+
+    lightPosition = vec3.fromValues(9.0, 3.0, 9.0);
+    var lightPos = gl.getUniformLocation(program, "lightPosition");
+    gl.uniform3fv(lightPos, lightPosition);
 
     // initiale Kameraposition einstellen
     eye = vec3.fromValues(10.0, 0.0, 20.0);
@@ -174,6 +185,8 @@ function render()
   // viewMatrix und projectionMatrix übergeben
   gl.uniformMatrix4fv(viewMatrixLoc, false, viewMatrix);
   gl.uniformMatrix4fv(projectionMatrixLoc, false, projectionMatrix);
+
+  gl.uniform4fv(cameraPos, eye);
 
   // Objekte zeichnen (Definition der Objekte s. RenderObject.js)
   objects.forEach(drawObject);
@@ -342,7 +355,7 @@ function updateViewingDirection(e)
   angleXZ = -movementY * 0.00025;/// (2 * Math.PI);
   rotateVertically(angleXZ);
 
-  console.log("mousemove x: "+angleY+" mousemove y: "+angleXZ);
+  //console.log("mousemove x: "+angleY+" mousemove y: "+angleXZ);
 
   mat4.lookAt(viewMatrix, eye, target, up);
 }
