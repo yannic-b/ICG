@@ -68,16 +68,16 @@
             {
                 vec4 fColor = objectColor;
 
-								vec3 vecPointToEye = vecPoint - cameraPos;
+								vec3 vecPointToEye = normalize(vecPoint - cameraPos);
 
                 vec3 ambientLightIntensity = vec3(0.5, 0.5, 0.5);
                 vec3 lightIntensity = vec3(0.1, 0.1, 0.1);
 
-								vec3 r = reflect(vecPointToLight, fragNormal);
+								vec3 r = normalize(reflect(vecPointToLight, fragNormal));
 
                 vec3 light = ambientLightIntensity*0.9 +
-														((lightIntensity*0.0) * max(0.0, dot(vecPointToLight, fragNormal))) +
-														((lightIntensity*0.1) * pow(float(max(0.0, dot(r, vecPointToEye))), 1.0));
+														((lightIntensity*5.0) * max(0.0, dot(normalize(vecPointToLight), normalize(fragNormal)))) +
+														((lightIntensity*5.0) * pow(float(max(0.0, dot(r, vecPointToEye))), 2.0));
 
                 gl_FragColor = vec4(light * fColor.rgb, fColor.a); //fColor;//
             }
