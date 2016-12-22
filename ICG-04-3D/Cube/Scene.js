@@ -119,7 +119,7 @@ function setupWebGL(document)
 
     cameraPos = gl.getUniformLocation(program, "cameraPos");
 
-    lightPosition = vec3.fromValues(9.0, 3.0, 9.0);
+    lightPosition = vec3.fromValues(19.0, 3.0, 9.0);
     var lightPos = gl.getUniformLocation(program, "lightPosition");
     gl.uniform3fv(lightPos, lightPosition);
 
@@ -344,7 +344,7 @@ function updateViewingDirection(e)
       e.mozMovementX ||
       e.webkitMovementX ||
       0;
-  angleY = -movementX * 0.0025;/// (2 * Math.PI);
+  angleY = -movementX * 0.005;/// (2 * Math.PI);
   rotateHorizontally(angleY);
 
   //Vertical Movement:
@@ -352,7 +352,7 @@ function updateViewingDirection(e)
       e.mozMovementY ||
       e.webkitMovementY ||
       0;
-  angleXZ = -movementY * 0.00025;/// (2 * Math.PI);
+  angleXZ = -movementY * 0.0005;/// (2 * Math.PI);
   rotateVertically(angleXZ);
 
   //console.log("mousemove x: "+angleY+" mousemove y: "+angleXZ);
