@@ -1,5 +1,5 @@
 // Render-Objekt mit Properties für Rendering
-var RenderObject = function(modelMatrix, color, vertexBuffer, indexBuffer, normalBuffer)
+var RenderObject = function(modelMatrix, color, vertexBuffer, indexBuffer, normalBuffer, id)
 {
     this.modelMatrix = modelMatrix;
     this.color = color;
@@ -7,6 +7,7 @@ var RenderObject = function(modelMatrix, color, vertexBuffer, indexBuffer, norma
     this.indexBuffer = indexBuffer;
     this.numVertices = indexBuffer.numItems;
     this.normalBuffer = normalBuffer;
+    this.id = id;
 }
 /*
 /// generiert für eine gegebene Farbe ein einfarbiges Color-Array, das als Color-Buffer verwendet werden kann

@@ -28,6 +28,8 @@ var positionLoc;
 
 var cameraPos;
 
+var groundTexture;
+
 window.onload = function init()
 {
     // WebGL initialisieren
@@ -35,6 +37,9 @@ window.onload = function init()
 
     // Objekte initilisieren
     initObjects();
+    
+    // Texturen laden
+    initTextures();
 
     //pointer lock initialisieren
     setUpPointerLock();
@@ -42,6 +47,23 @@ window.onload = function init()
     // Render-Loop beginnen
 	render();
 };
+
+function initTextures() {
+    gl.enable(gl.TEXTURE_2D);
+    groundTexture = gl.createTexture();
+    groundImage = new Image();
+    groundImage.onload = function() { handleTextureLoaded(groundImage, groundTexture); }
+    groundImage.src = "sand_diffuse.png";
+}
+
+function handleTextureLoaded(image, texture) {
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+}
 
 function initObjects()
 {
@@ -74,10 +96,10 @@ function initObject(id, scale, color, pos)
     OBJ.initMeshBuffers(gl, carAndTreeMesh);
 
     // Create object
-    var carAndTreeObject = new RenderObject(mat4.create(), color, carAndTreeMesh.vertexBuffer, carAndTreeMesh.indexBuffer, carAndTreeMesh.normalBuffer);
+    var carAndTreeObject = new RenderObject(mat4.create(), color, carAndTreeMesh.vertexBuffer, carAndTreeMesh.indexBuffer, carAndTreeMesh.normalBuffer, id);
     mat4.fromScaling(carAndTreeObject.modelMatrix, vec3.fromValues(scale, scale, scale));
     mat4.translate(carAndTreeObject.modelMatrix, carAndTreeObject.modelMatrix, vec3.scale(pos, pos, 1/scale));
-
+    
     // Push object on the stack
     objects.push(carAndTreeObject);
 
@@ -147,6 +169,57 @@ function drawObject(object, index, originalArray)
     // Set uniforms
     gl.uniformMatrix4fv(modelMatrixLoc, false, object.modelMatrix);
     gl.uniform4fv(colorLoc, object.color);
+    
+    // Für Untergrund Sand-Textur anwenden
+    if (object.id == "ground")
+    {
+        var cubeVerticesTextureCoordBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, cubeVerticesTextureCoordBuffer);
+        
+        var textureCoordinates = [
+                                  // vorne
+                                  0.0,  0.0,
+                                  1.0,  0.0,
+                                  1.0,  1.0,
+                                  0.0,  1.0,
+                                  // hinten
+                                  0.0,  0.0,
+                                  1.0,  0.0,
+                                  1.0,  1.0,
+                                  0.0,  1.0,
+                                  // oben
+                                  0.0,  0.0,
+                                  1.0,  0.0,
+                                  1.0,  1.0,
+                                  0.0,  1.0,
+                                  // unten
+                                  0.0,  0.0,
+                                  1.0,  0.0,
+                                  1.0,  1.0,
+                                  0.0,  1.0,
+                                  // rechts
+                                  0.0,  0.0,
+                                  1.0,  0.0,
+                                  1.0,  1.0,
+                                  0.0,  1.0,
+                                  // links
+                                  0.0,  0.0,
+                                  1.0,  0.0,
+                                  1.0,  1.0,
+                                  0.0,  1.0
+                                  ];
+        
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordinates),
+                      gl.STATIC_DRAW);
+        
+        var textureCoordAttribute = gl.getAttribLocation(program, "aTextureCoord");
+        gl.enableVertexAttribArray(textureCoordAttribute);
+        
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, groundTexture);
+        gl.uniform1i(gl.getUniformLocation(program, "uSampler"), 0);
+    }
+
 
     // Draw
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, object.indexBuffer);
