@@ -29,6 +29,12 @@ var positionLoc;
 var cameraPos;
 
 var groundTexture;
+var groundImage;
+
+var vertexPositionAttribute;
+var textureCoordAttribute;
+
+var groundVerticesTextureCoordBuffer;
 
 window.onload = function init()
 {
@@ -49,7 +55,7 @@ window.onload = function init()
 };
 
 function initTextures() {
-    gl.enable(gl.TEXTURE_2D);
+    // gl.enable(gl.TEXTURE_2D);
     groundTexture = gl.createTexture();
     groundImage = new Image();
     groundImage.onload = function() { handleTextureLoaded(groundImage, groundTexture); }
@@ -72,8 +78,8 @@ function initObjects()
 
     initObject("car-and-tree", 2.0, vec4.fromValues(0.9, 0.2, 0.1, 1), vec3.fromValues(15, -5.4, 0));
     initObject("house", 1.0, vec4.fromValues(0.6, 0.4, 0.2, 1), vec3.fromValues(0, -5, 0));
-    initObject("ground", 1.0, vec4.fromValues(0.2, 0.9, 0.1, 1), vec3.fromValues(0, 4.5, 0));
 
+    
     for (var i = 0; i < numberOfBalloons; i++)
     {
       initObject("balloon", 0.5,
@@ -85,6 +91,9 @@ function initObjects()
                                 Math.random() * 42 + 5,
                                 Math.random() * 250 - 125));
     }
+    
+    initObject("ground", 1.0, vec4.fromValues(0.2, 0.9, 0.1, 1), vec3.fromValues(0, 4.5, 0));
+    
     //initObject("balloon", vec4.fromValues(1.0, 0.1, 0.1, 1), vec3.fromValues(0, 5, 0));
 }
 
@@ -165,7 +174,7 @@ function drawObject(object, index, originalArray)
     var normalAttribLocation = gl.getAttribLocation(program, "vertNormal");
     gl.vertexAttribPointer(normalAttribLocation, 3, gl.FLOAT, gl.TRUE, 3 * Float32Array.BYTES_PER_ELEMENT, 0);
     gl.enableVertexAttribArray(normalAttribLocation);
-
+    
     // Set uniforms
     gl.uniformMatrix4fv(modelMatrixLoc, false, object.modelMatrix);
     gl.uniform4fv(colorLoc, object.color);
@@ -173,8 +182,20 @@ function drawObject(object, index, originalArray)
     // Für Untergrund Sand-Textur anwenden
     if (object.id == "ground")
     {
-        var cubeVerticesTextureCoordBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, cubeVerticesTextureCoordBuffer);
+        /*
+        var groundModelMatrix = new Float32Array([1, 0, 0, 0,
+                                                  0, 0.001, 0, 0,
+                                                  0, 0, 1, 0,
+                                                  0, 0, 0, 0.1]);
+        
+        gl.uniformMatrix4fv(modelMatrixLoc, false, groundModelMatrix);
+         */
+        
+        
+        gl.uniformMatrix4fv(modelMatrixLoc, false, object.modelMatrix);
+        
+        groundVerticesTextureCoordBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, groundVerticesTextureCoordBuffer);
         
         var textureCoordinates = [
                                   // vorne
@@ -212,18 +233,35 @@ function drawObject(object, index, originalArray)
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordinates),
                       gl.STATIC_DRAW);
         
-        var textureCoordAttribute = gl.getAttribLocation(program, "aTextureCoord");
+        vertexPositionAttribute = gl.getAttribLocation(program, "aVertexPosition");
+        gl.enableVertexAttribArray(vertexPositionAttribute);
+        
+        textureCoordAttribute = gl.getAttribLocation(program, "aTextureCoord");
         gl.enableVertexAttribArray(textureCoordAttribute);
+        
+        gl.bindBuffer(gl.ARRAY_BUFFER, groundVerticesTextureCoordBuffer);
+        gl.vertexAttribPointer(textureCoordAttribute, 2, gl.FLOAT, false, 0, 0);
         
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, groundTexture);
         gl.uniform1i(gl.getUniformLocation(program, "uSampler"), 0);
+        
+        
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,
+                      new Uint16Array(object.numVertices), gl.STATIC_DRAW);
+        
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, object.indexBuffer);
+        
+
+        gl.drawElements(gl.TRIANGLES, object.numVertices, gl.UNSIGNED_SHORT, 0);
     }
-
-
-    // Draw
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, object.indexBuffer);
-    gl.drawElements(gl.TRIANGLES, object.numVertices, gl.UNSIGNED_SHORT, 0);
+    else
+    {
+        // Draw
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, object.indexBuffer);
+        gl.drawElements(gl.TRIANGLES, object.numVertices, gl.UNSIGNED_SHORT, 0);
+    }
+    
 }
 
 function render()
