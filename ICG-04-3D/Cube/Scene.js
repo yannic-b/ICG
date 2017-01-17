@@ -180,6 +180,52 @@ function drawObject(object, index, originalArray)
     gl.uniform4fv(colorLoc, object.color);
     
     // Für Untergrund Sand-Textur anwenden
+    
+    /*
+     Leider ist es uns nicht gelungen, eine Textur sichtbar zu machen.
+     
+     Als Ressourcen haben wir verwendet:
+     - diese Anleitung zur Einbindung einer Textur auf einem Würfel
+     https://developer.mozilla.org/de/docs/Web/API/WebGL_API/Tutorial/Texture
+     n_in_WebGL_verwenden
+     - den Quellcode dieser Demo dazu
+     http://mdn.github.io/webgl-examples/tutorial/sample6/index.html
+     - dieses YouTube-Tutorial
+     https://www.youtube.com/watch?v=hpnd11doMgc
+     
+     (alles sehr empfehlenswert, hat uns jedoch leider noch nicht zum Erfolg geführt)
+     
+     Entscheidend ist, dass sowohl Fragment- als auch Vertexshader verändert
+     werden müssen.
+     Es gibt neue varyings, die per JS abgegriffen werden und es gilt
+     jeweils eine andere sich daraus ergebende Berechnung für
+     gl_FragColor
+     und
+     gl_Position
+     —> die auskommentierte Version ist die, wie es “sein sollte”, damit
+     Texturen funktionieren. Auskommentiert ist sie momentan, da dann gar
+     nichts mehr gerendert wird.
+     
+     Der entscheidene Abschnitt im JS-Code ist zum einen natürlich die
+     Initialisierung und Belegung der Variablen und Buffer, für die ganzen
+     Textur-Koordinaten und zum anderen vor allem der Bereich für
+     if (object.id == "ground")
+     {
+     …
+     }
+     - wenn man den auskommentiert, ist alles wieder “wie vorher” 😉
+     Ich habe versucht, in dem Moment eine Fallunterscheidung einzubauen,
+     damit nur für den Boden eine Textur angewandt wird.
+     Für den WebGL-Teil in der index.html ist es schwierig, diese Fallunterscheidung fortzuführen,
+     da wir hier keine Möglichkeit mehr haben zu übrigens, welche Vertices oder Fragments gerade behandelt werden.
+     
+     Wir haben versucht, nur den Boden zu rendern, andere
+     Modelmatrixes für den Boden zu verwenden (damit die Texturkoordinaten
+     besser passen) und wirklich alles mögliche ausprobiert und rumgehackt,
+     aber leider ohne Erfolg.
+     Das nächste, was wir geschafft haben ist, dass unsere bisherigen Objekte
+     alle komplett ohne Farbinfos (also schwarz) gezeichnet wurden… 😀
+     */
     if (object.id == "ground")
     {
         /*
