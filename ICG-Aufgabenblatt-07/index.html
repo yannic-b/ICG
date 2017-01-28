@@ -1,0 +1,212 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<title>Normal Mapping</title>
+		
+        <script id="vertex-shader-cubemap" type="x-shader/x-vertex">
+            attribute vec4 vPosition;
+            
+            uniform mat4 modelMatrix;
+            uniform mat4 projectionMatrix;
+            uniform mat4 viewMatrix;
+            
+            varying vec3 dirVector;
+            
+            void main()
+            {
+                gl_Position = projectionMatrix * viewMatrix * modelMatrix * vPosition;
+                dirVector = vPosition.xyz;
+            }
+        </script>
+        <script id="fragment-shader-cubemap" type="x-shader/x-fragment">
+            precision mediump float;
+            
+            uniform vec4 objectColor;
+            
+            uniform samplerCube skybox;
+            varying vec3 dirVector;
+            
+            void main()
+            {
+                gl_FragColor = textureCube(skybox, dirVector);
+                //	gl_FragColor = objectColor;
+            }
+        </script>
+        
+        
+        <script id="vertex-shader" type="x-shader/x-vertex">
+            attribute vec4 vPosition;
+            
+            uniform mat4 modelMatrix;
+            uniform mat4 projectionMatrix;
+            uniform mat4 viewMatrix;
+            
+            void main()
+            {
+                gl_Position = projectionMatrix * viewMatrix * modelMatrix * vPosition;
+            }
+        </script>
+        <script id="fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+            
+            uniform vec4 objectColor;
+            
+            void main()
+            {
+                gl_FragColor = objectColor;
+            }
+        </script>
+        
+        <script id="vertex-shader-lighting" type="x-shader/x-vertex">
+            attribute vec4 vPosition;
+            attribute vec4 vNormal;
+            attribute vec2 vTexCoord;
+            
+            // position of the light in world coordinates
+            uniform vec3 lightPosition;
+            
+            // transformation matrices
+            uniform mat4 modelMatrix;
+            uniform mat4 projectionMatrix;
+            uniform mat4 viewMatrix;
+            
+            // pre-computed normal matrix
+            uniform mat4 normalMatrix;
+            
+            varying vec3 lightDirection;
+            varying vec3 viewDirection;
+            varying float distance;
+            
+            varying highp vec2 vTextureCoord;
+            
+            vec3 tangent() {
+                vec3 tangent;
+                vec3 binormal;
+                
+                vec3 c1 = cross(vNormal.xyz, vec3(0.0, 0.0, 1.0));
+                vec3 c2 = cross(vNormal.xyz, vec3(0.0, 1.0, 0.0));
+                
+                if (length(c1) > length(c2))
+                {
+                    tangent = c1;
+                }
+                else
+                {
+                    tangent = c2;
+                }
+                
+                tangent = normalize(tangent);
+                
+                return(tangent);
+            }
+        
+        void main()
+        {
+            
+            // Compute matrix for eye space -> tangent space
+            vec3 n = normalize(normalMatrix * vNormal).xyz;
+            vec3 t = normalize(normalMatrix * vec4(tangent(), 1.0)).xyz;
+            vec3 b = cross(n, t);
+            
+            // Transform vertexPos and lightPos to eye space
+            mat4 modelViewMatrix = viewMatrix * modelMatrix;
+            vec4 lightPos = viewMatrix * vec4(lightPosition, 1);
+            vec4 position = modelViewMatrix * vPosition;
+            
+            // light direction
+            vec3 tmpVec = (lightPos - position).xyz;
+            
+            // Transform light pos to tangent space
+            lightDirection.x = dot(tmpVec, t);
+            lightDirection.y = dot(tmpVec, b);
+            lightDirection.z = dot(tmpVec, n);
+            lightDirection = normalize(lightDirection);
+            
+            // view direction
+            tmpVec = (-position).xyz;
+            
+            // Transform eye pos to tangent space
+            viewDirection.x = dot(tmpVec, t);
+            viewDirection.y = dot(tmpVec, b);
+            viewDirection.z = dot(tmpVec, n);
+            viewDirection = normalize(viewDirection);
+            
+            // distance between light source and vertex
+            distance = length(lightPos - position);
+            
+            // Pass tex coords to fragment shader
+            vTextureCoord = vTexCoord;
+            
+            gl_Position = projectionMatrix * position;
+        }
+        </script>
+        <script id="fragment-shader-lighting" type="x-shader/x-fragment">
+            precision mediump float;
+            
+            uniform sampler2D diffuseMap;
+            uniform sampler2D normalMap;
+            
+            // ambient intensity
+            uniform vec4 Ia;
+            
+            // diffuse and specular intensities of the light source
+            uniform vec4 Id;
+            uniform vec4 Is;
+            
+            // ambient, diffuse and specular reflection factors (object specific)
+            uniform vec4 ka;
+            uniform vec4 kd;
+            uniform vec4 ks;
+            
+            // constant, linear and quadratic attenuation factors
+            const float c1 = 1.0;
+            const float c2 = 0.0005;
+            const float c3 = 0.000003;
+            
+            // specular exponent
+            const float exp = 5.0;
+            
+            varying vec3 lightDirection;
+            varying vec3 viewDirection;
+            varying float distance;
+            
+            varying highp vec2 vTextureCoord;
+            
+            void main()
+            {				
+                vec3 V = viewDirection;
+                vec3 L = lightDirection;
+                
+                // read normal from normal map and shift it from [0, 1] to [-1, 1]
+                vec3 N = normalize(texture2D(normalMap, vec2(vTextureCoord.s, vTextureCoord.t)).xyz * 2.0 - 1.0);
+                
+                // reflection direction
+                vec3 R = reflect(-L, N);	
+                
+                // distance attenuation
+                float fAtt = min(1.0 / (c1 + c2 * distance + c3 * pow(distance, 2.0)), 1.0);
+                
+                vec4 diffuseColor = texture2D(diffuseMap, vec2(vTextureCoord.s, vTextureCoord.t));
+                
+                gl_FragColor = Ia * ka + fAtt * (Id * diffuseColor * max(dot(N, L), 0.0) + Is * ks * pow(max(0.0, dot(R, V)), exp));
+            }
+        </script>
+
+		<script type="text/javascript" src="../Common/webgl-utils.js">
+		</script>
+		<script type="text/javascript" src="../Common/initShaders.js">
+		</script>
+		<script type="text/javascript" src="../Common/gl-matrix.js">
+		</script>
+		<script type="text/javascript" src="Scene.js">
+		</script>
+	</head>
+	<body>
+
+		<canvas id="gl-canvas" width="1200" height="1000">
+			If you see this, your browser doesn't support WebGL.
+		</canvas>
+		
+	</body>
+</html>

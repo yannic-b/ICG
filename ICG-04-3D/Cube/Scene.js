@@ -316,23 +316,23 @@ function render()
   // zuerst die Buffer leeren
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	// Hier wird die Bewegung ausgeführt
-	if (isDown[0])
-	{
-		moveForward();
-	}
-	if (isDown[1])
-	{
-		moveLeft();
-	}
-	if (isDown[2])
-	{
-		moveBackwards();
-	}
-	if (isDown[3])
-	{
-		moveRight();
-	}
+    // Hier wird die Bewegung ausgeführt
+    if (isDown[0])
+    {
+        moveForward();
+    }
+    if (isDown[1])
+    {
+        moveLeft();
+    }
+    if (isDown[2])
+    {
+        moveBackwards();
+    }
+    if (isDown[3])
+    {
+        moveRight();
+    }
 
   // nach Bewegung Blickrichtung der Kamera aktualisieren
   mat4.lookAt(viewMatrix, eye, target, up);
